@@ -36,6 +36,6 @@ To contribute, please run the tutorial files `tutorial.py`, `alkhairy2019.m`, an
 
 ## References
 [1] Alkhairy, S. A., & Shera, C. A. (2019). An analytic physically motivated model of the mammalian cochlea. The Journal of the Acoustical Society of America, 145(1), 45-60. [link](https://doi.org/10.1121/1.5084042).  
-[2] Alkhairy, S. A. (2024, February). Cochlear wave propagation and dynamics in the human base and apex: Model-based estimates from noninvasive measurements. In AIP Conference Proceedings (Vol. 3062, No. 1). AIP Publishing. [link](https://doi.org/10.1121/1.5084042).   
-[3] Alkhairy, S. A. (2024). Characteristics-Based Design of Multi-Exponent Bandpass Filters. arXiv preprint arXiv:2404.15321. [link](https://doi.org/10.1121/1.5084042).  
-[4] Alkhairy, S. A. (2024). Rational-Exponent Filters with Applications to Generalized Auditory Filterbanks. arXiv preprint arXiv:2406.16877. [link](https://doi.org/10.1121/1.5084042).  
+[2] Alkhairy, S. A. (2024, February). Cochlear wave propagation and dynamics in the human base and apex: Model-based estimates from noninvasive measurements. In AIP Conference Proceedings (Vol. 3062, No. 1). AIP Publishing. [link](https://doi.org/10.1063/5.0189264).   
+[3] Alkhairy, S. A. (2024). Characteristics-Based Design of Multi-Exponent Bandpass Filters. arXiv preprint arXiv:2404.15321. [link](https://arxiv.org/abs/2404.15321v1).  
+[4] Alkhairy, S. A. (2024). Rational-Exponent Filters with Applications to Generalized Auditory Filterbanks. arXiv preprint arXiv:2406.16877. [link](https://arxiv.org/abs/2406.16877v2).  
