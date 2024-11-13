@@ -4,7 +4,7 @@ TO DO:: insert description
 
 
 ## Capabilities for Filter Design and Filtering
-
+The toolset includes functionalities include filter construction and signal processing using filters for arbitrary filters and signals. It also includes filter design functionalities specific to a class of bandpass filters (referred to as GEFs) and related classes of bandpass filters, multiband filters, and filterbanks. GEFs are LTI filters with a pair of poles repeated $B_u$ times.
 
 ### General Filters and Signals: Constructing Arbitrary Filters, Filterbanks, and Multiband Filters
 * Arbitrary filters may be constructed - e.g. using provided poles and zeros, then used for filtering any signal.
@@ -30,7 +30,7 @@ TO DO:: insert description
 
 
 ### GEFs: Potential Signal Processing Applications for GEFs
-* Potential applications may benefit from the direct specification over desired characteristics as well as the fine control over the characteristics enabled by the rational exponents.  may include: parameteric equalizers, INSERT XXX
+* Potential applications may benefit from the direct specification over desired characteristics as well as the fine control over the characteristics enabled by the rational exponents primarily include those that make use of bandpass filterbanks and multiband filters. Such applications may include: parameteric equalizers, a front end for speech processing, microseismic signal XXX INSERT. 
 
 ### GEFs: Filters Related to GEFs
 * Filters related to GEFs include the gammatone family of filters - e.g. Gammatone Filters (GTFs), All-Pole Gammatone Filters (APGFs), One-zero Gammatone Filters (OZGFs) [5]
@@ -42,8 +42,11 @@ TO DO:: insert description
 
 
 ## Capabilities for Studying Auditory Physics and Cochlear Mechanics
-* 
-* 
+* Variables of the cochlear model include (1) response variables (which are related to the filters) that may in principle be observed in some species: differential pressure across the OoC, and OoC velocity, as well (2) mechanistic variables which contain information how the model works: the differential pressure wavenumber, and the effective impedance of the OoC.
+* A user may specify a species (human or chinchilla) or model constants that vary slowly along the length of the cochlea to generate the mechanistic variables and functional response variables.
+* A user may study the dependence of mechanistic variable behavior on observed response characteristics.
+* Alternatively, given reported response characteristics such as quality factors and group delays, the methods can be used to estimate the underlying mechanistic variables which encode properties of interest to auditory physicists such as negative effective damping. This feature is related to the filter design methods mentioned above where desired values for characteristics are provided to design filters (which map onto to response variables in the cochlear model).
+* _Key Assumptions:_ The cochlear model is related to the filterbank and assumes an uncoiled box model of the cochlea with a single partition for the Organ of Corti (OoC). The model is developed based on observations from the response of the active mammalian cochlea to low stimulus levels (and hence linear). The derivation also assumes local scaling symmetry of the wavenumber - i.e. the model constants or filter characteristics such as quality factors vary slowly along the length of the cochlea.
 
 
 ## Tutorials and Documentation
