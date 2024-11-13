@@ -4,7 +4,7 @@ TO DO:: insert description
 
 
 ## Capabilities for Filter Design and Filtering
-The toolset includes functionalities include filter construction and signal processing using filters for arbitrary filters and signals. It also includes filter design functionalities specific to a class of bandpass filters (referred to as GEFs) and related classes of bandpass filters, multiband filters, and filterbanks. GEFs are LTI filters with a pair of poles repeated $B_u$ times.
+The toolset includes functionalities include filter construction and signal processing using filters for arbitrary filters and signals. It also includes filter design functionalities specific to a class of bandpass filters (referred to as GEFs) and related classes of bandpass filters, multiband filters, and filterbanks. GEFs are bandpass LTI filters with a pair of poles repeated $B_u$ times.
 
 ### General Filters and Signals: Constructing Arbitrary Filters, Filterbanks, and Multiband Filters
 * Arbitrary filters may be constructed - e.g. using provided poles and zeros, then used for filtering any signal.
@@ -68,7 +68,6 @@ This can be done globally or using a virtual environment - e.g. [see here](https
 
 ## Contributing
 Before submitting a pull request, please run the tutorial files `tutorial.py`, `alkhairy2019.m`, and `alkhairy2024.m` to make sure that the changes do not break the code. Future releases may include dedicated testing scripts.
-
 
 
 ## References
