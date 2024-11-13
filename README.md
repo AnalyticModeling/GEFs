@@ -19,7 +19,7 @@ TO DO: insert description
 
 
 ## Requirements for Running the Toolbox
-The toolbox may be used in Python or MATLAB. In either case, you will need to install Python along with required libraries.
+The toolbox may be used in Python or MATLAB. In either case, you will need to install Python along with required libraries which are listed in `requirements.txt`.
 
 To install the requirements, run the following in Python 3,
 
