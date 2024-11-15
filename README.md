@@ -67,7 +67,7 @@ $ pip -r install requirements.txt
 This can be done globally or using a virtual environment - e.g. [see here](https://dev.to/emminex/how-to-install-python-libraries-in-visual-studio-code-38i1).
 
 ## Contributing
-Before submitting a pull request, please run the tutorial files `tutorial.py`, `alkhairy2019.m`, and `alkhairy2024.m` to make sure that the changes do not break the code. Future releases may include dedicated testing scripts.
+Before submitting a pull request, please run the tutorial files `tutorial.py`, `alkhairy2019.m`, and `alkhairy2024.m` to make sure that the changes do not break the code. Future releases may include dedicated unit tests.
 
 
 ## References
