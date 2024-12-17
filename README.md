@@ -1,6 +1,5 @@
 # GEFs
-TO DO:: insert description 
-
+The toolbox has been primarily developed for filter design and signal processing and analysis purposes as well as for the scientific study of the auditory system pertaining to the cochlea and perceptual studies. The toolbox has been developed such that users with interests and backgrounds in only one of the aforementioned fields may use it without concerning themselves with other functionalities. 
 
 
 ## Capabilities for Filter Design and Filtering
