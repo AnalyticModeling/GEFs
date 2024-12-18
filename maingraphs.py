@@ -369,76 +369,22 @@ def fig9_pending():
   fig.suptitle('equivalence of representations Aₚ=0.04, bₚ=1, Bᵤ=1.5')
   plt.show()
 
-def something():
-  fil = Filter(Ap=0.05, bp=1, Bu=2, cf=1)
-  pairs = [(1, 20), (5, 50), (7/8, 70), (1/5, 40)]
-  def tones(t):
-    ans = 0
-    for i in range(4):
-      fi, ti = pairs[i]
-      ans += np.exp(-((t-ti)/5)**2) * np.sin(2*np.pi*fi*t)
-    return ans
-  fs = 10
-  sig1 = Signal(mode='ttilde', data=[tones(t/fs) for t in range(fs*100)], fs=fs)
-
-  func = (lambda t: t*np.cos(10*t)*np.exp(-t/2) + t**3*np.exp(-t)*np.cos(t))
-  sig2 = Signal(mode='ttilde', data=[func(t/fs) for t in range(fs*100)], fs=fs)
-  fil.solve(sig1, method='tf').plot(custom_title='sig1, tf')
-  fil.solve(sig1, method='ode').plot(custom_title='sig1, ode')
-  fil.solve(sig2, method='tf').plot(custom_title='sig2, tf')
-  fil.solve(sig2, method='ode').plot(custom_title='sig2, ode')
-
 if __name__ == "__main__":
-  # fig3_2019()
-  # fig6_2019()
-  # fig8_2019()
-  # fig2_2022()
-  # fig1_2024()
-  # fig3_2024()
-  # fig5_2024()
-  # fig1_pending()
-  # fig2_pending()
-  # fig3_pending()
+  fig3_2019()
+  fig6_2019()
+  fig8_2019()
+  fig2_2022()
+  fig1_2024()
+  fig3_2024()
+  fig5_2024()
+  fig1_pending()
+  fig2_pending()
+  fig3_pending()
   fig4_pending()
   fig7_pending()
   fig8_pending()
   fig9_pending()
-  # something()
 
   # example for all four plots for cochlea
   # one example of filter using rational characteristics
-  # design single filter using Qerb and N and wahtever and calculate desired errors
-
-
-
-
-  ###
-
-  # dfact = lambda z: (2**(z-1)*scipy.special.gamma(z))
-  # print([dfact(i+0.5) for i in range(5)])
-
-  # def double_fact(x):
-  #   if abs(x-round(x)) < 1e-10:
-  #     return 2**(x-1)*scipy.special.gamma(x)
-  #   else:
-  #     return (2/np.pi)**0.5*2**(x-1)*scipy.special.gamma(x)
-
-  # print([double_fact(i/2) for i in range(1, 10)])
-
-
-  # fig6fst: Ap = 0.3731140580955281, bp = 0.2, Bu = 3.722356449423675
-  # fil = Filter(type='V', Ap = 0.3731140580955281, bp = 0.2, Bu = 3.722356449423675)
-  # tf = fil.filter.tf
-
-
-  # Ap = 0.3731140580955281
-  # bp = 0.2
-  # Bu = 3.722356449423675
-  # p = -Ap + 1j*bp
-  # print(p)
-  # tf = (lambda s: ((s + Ap) / ((s - p) * (s - p.conjugate()))**(Bu+1)))
-
-  # xaxis = np.geomspace(0.01, 1, 10000)
-  # plt.plot(xaxis, [abs(tf(x*1j)) for x in xaxis])
-  # plt.show()
-  # print(fil.get_computed_chars())
+  # design single filter using Qerb and N and whatever and calculate desired errors

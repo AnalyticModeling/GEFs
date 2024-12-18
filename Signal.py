@@ -7,63 +7,61 @@ def tolerate(x, eps=1e-10):
   return abs(x-round(x)) <= eps
 
 class Signal:
+  '''
+  Class for a Signal that various representations of a signal (e.g. in time and frequency domains) into one object.
+  '''
   # consider making directly iterable/indexable?
-  # make sure spectrogram captions are changed if mode is b/ttilde?
   num_signals_made = 0
-  def __init__(self, mode='t', data=[0 for _ in range(9)], fs=1):
+  def __init__(self, mode='t', data=[0 for _ in range(9)], fs=1, evenlen=True):
   # allow vector of timestamps/'freq'stamps?
     '''
-    Signal as object
+    Initialize Signal given mode, data, and sampling frequency of Signal.
 
-    Note: lists and Numpy arrays are generally automatically converted to
-      Signals with default sample rate 44100
+    When mode is 'f', 'w', or 'b', `evenlen` is used to determine the length \
+      of the Signal in the time domain (specifically setting `evenlen` to `True`/`False` \
+      will result in an even/odd length Signal in the time domain respectively.
 
     Arguments:
-      mode: domain data is originally in. Defaults to 't'. Should be one of \
+      mode: Domain which the data is originally in. Defaults to 't'. Should be one of \
         't': time (including scaled time) \
         'f': frequency \
         'w': angular frequency \
         'b': normalized angular frequency \
         'beta': same as b \
         'ttilde': scaled time
-      data: raw numerical data
-      fs: sampling rate of data. defaults to 1
-      **fs is not the scaling factor between t/f/w and b/ttilde (that is intrinsic to the filter)
-
-    Attributes:
-      uid: UID of filter
-
+      data: Raw numerical data
+      fs: Sampling rate of data (kHz). Defaults to 1.
+      evenlen: Determines whether or not length of Signal in time domain is even if Signal is initialized in frequency domain. Default is True.
+    NOTE: fs is not the scaling factor between t/f/w and b/ttilde (that is intrinsic to the filter)
     '''
     self.uid = self.num_signals_made
     Signal.num_signals_made += 1
 
-    data = np.array(data) # helps with MATLAB inputs
+    data = np.array(data) # helps with MATLAB inputs and brevity of code
 
-    if mode not in ['t', 'f', 'w', 'b', 'beta', 'ttilde']: raise Exception() # get ttilde mode
+    if mode not in ['t', 'f', 'w', 'b', 'beta', 'ttilde']: raise Exception()
     self.mode = mode
     if mode == 'beta':
-      self.mode = 'b'
+      self.mode = 'b' # could save a bit of typing
     self.fs = fs
 
+    # having self.length as length of self.mode_t keeps a bit more info (literally)
     if self.mode in ['t', 'ttilde']:
       self.mode_t = data
       self.mode_f = sp.fft.rfft(data)
+      self.length = len(data)
     else:
       if self.mode == 'w':
         self.mode_f = data / 2 / np.pi
       else:
         self.mode_f = data
-      self.mode_t = sp.fft.irfft(self.mode_f)
+      self.length = 2*len(data)-1-int(evenlen) # -2 if evenlen is True and -1 if evenlen is False
+      self.mode_t = sp.fft.irfft(self.mode_f, self.length)
 
     self.func = (lambda t: self.at_time(t, tolerance=0)) # automatically in time domain, from_function for other domains
-    self.length = len(self.mode_t) # more info than len(self.mode_f)
-    # if timestamps is not None:
-    #   self.timestamps = timestamps
-    # else:
-    #   self.timestamps = [i/fs for i in range(self.length)]
     self.timestamps = np.arange(self.length)/fs
     self.freqstamps = scipy.fft.rfftfreq(self.length, 1/fs) # explain why
-    if self.mode in ['b', 'beta', 'ttilde']: # 
+    if self.mode in ['b', 'beta', 'ttilde']:
       self.freqstamps *= 2 * np.pi
 
     self.mean = np.mean(self.mode_t)
@@ -72,20 +70,29 @@ class Signal:
     self.analytic = sp.signal.hilbert(self.mode_t)
     self.hilbert = np.real(self.analytic)
     self.inst_phase = np.unwrap(np.angle(self.analytic))
-    # mag2db?
 
   @classmethod
-  def from_function(cls, mode='t', func=(lambda x: 0), fs=1, num_samples=9):
+  def from_function(cls, mode='t', func=(lambda x: 0), fs=1, num_samples=9, evenlen=True):
     '''
-    Time is in ms. Frequency is in kHz.
+    Defines Signal from function generating values of Signal. For instance, if `mode` is 't',
+    `func` should be a function from time (s) to raw data (usually but not necessarily in kPa).
+
+    When mode is 'f', 'w', or 'b', `evenlen` is used to determine the length \
+      of the Signal in the time domain (specifically setting `evenlen` to `True`/`False` \
+      will result in an even/odd length Signal in the time domain respectively.
 
     Arguments:
-      mode: domain data is originally in. See __init__ for options
-      func: function generating data points of Signal
-      fs: sampling rate of data. defaults to 1
-      num_samples: number of samples to evaluate func at
+      mode: Domain data is originally in. See `__init__` for options
+      func: Function generating data of Signal
+      fs: Sampling rate of data (kHz). Defaults to 1.
+      num_samples: Number of places to sample `func` at
+      evenlen: Determines whether or not length of Signal in time domain is even if Signal is initialized in frequency domain. Default is True.
     '''
-    S = cls(mode=mode, data=[func(x/fs) for x in range(round(num_samples))], fs=fs)
+    if mode in ['t', 'ttilde']:
+      sample_points = np.arange(num_samples)/fs
+    else:
+      sample_points = sp.fft.rfftfreq(2*num_samples-1-int(evenlen), 1/fs)
+    S = cls(mode=mode, data=func(sample_points), fs=fs, evenlen=evenlen)
     S.func = func
     return S
 
@@ -99,12 +106,12 @@ class Signal:
     An angular frequency overrides the non-angular frequency.
 
     Arguments:
-      f_init: initial instantaneous frequency
-      w_init: initial angular instantaneous frequency
-      f_final: final instantaneous frequency
-      w_final: final angular instantaneous frequency
-      fs: sampling rate of data. defaults to 1
-      num_samples: number of data points in Signal (in time)
+      f_init: Initial instantaneous frequency
+      w_init: Initial angular instantaneous frequency
+      f_final: Final instantaneous frequency
+      w_final: Final angular instantaneous frequency
+      fs: Sampling rate of data. defaults to 1
+      num_samples: Number of data points in Signal (in time)
     '''
     fi = f_init
     if w_init:
@@ -115,7 +122,8 @@ class Signal:
       ff = w_final / 2 / np.pi
 
     endtime = (num_samples-1)/fs
-    return cls.from_function(mode='t', func=(lambda t: np.cos(np.pi*t*(fi*(2-t/endtime) + ff*(t/endtime)))), fs=fs, num_samples=num_samples) # np.cos(2*np.pi*t*(fi*(1-t/endtime/2) + ff*(t/endtime/2)))
+    return cls.from_function(mode='t', func=(lambda t: np.cos(np.pi*t*(fi*(2-t/endtime) + ff*(t/endtime)))), fs=fs, num_samples=num_samples, evenlen=(num_samples%2==0))
+    # evenlen is actually never used in this case since the mode is always 't', but just for completeness
 
   # @classmethod
   # def from_instantaneous_frequency(cls, freq_func=(lambda x: 0), freqs=None, init_phase=0, fs=1, num_samples=9):
@@ -232,7 +240,7 @@ class Signal:
 
   def at_time(self, t, tolerance=1e-10):
     '''
-    Gets the data at time t.
+    Gets the value of the Signal at time t.
 
     Fourier interpolates if t is not a multiple of the distance between samples with a tolerance
 
@@ -240,13 +248,9 @@ class Signal:
       t: time to get value of Signal at (in ms)
       tolerance: if t is within this value of a timestamp, \
         t is clamped to that timestamp and the value at that timestamp is taken
-
-    # figure these out again
     '''
     num = t * self.fs
-    # print(num)
     if tolerate(num, eps=tolerance):
-      # print('hi')
       return self.mode_t[round(num)%self.length]
 
     f = [k/self.length for k in self.mode_f]
@@ -262,10 +266,14 @@ class Signal:
 
   def get_data(self, mode='t'):
     '''
-    Get the data (default is in time domain)
+    Get the data series in terms of mode (default is in time domain). \
+      If Signal was original defined in 't' or 'w' or 'f', the only \
+      allowed modes are any of 't'/'w'/'f'. Similarly, Signals originally \
+      in 'b'/'beta' or 'ttilde' are only allowed to be accessed in \
+      'b'/'beta'/'ttilde' mode
 
     Arguments:
-      mode: what mode to get the data in
+      mode: Mode to get the data in. Default is 't' (time). See `__init__` for all options.
     '''
     if mode in ['t', 'f', 'w']:
       if self.mode not in ['t', 'f', 'w']:
@@ -311,8 +319,8 @@ class Signal:
 
   def envelope_analytic(self):
     '''
-    Outputs [upper, lower] where *upper* is the upper envelope \
-    of the Signal and *lower* is the lower envelope
+    Outputs [upper, lower] where `upper` is the upper envelope \
+      of the Signal and `lower` is the lower envelope.
     '''
     centered = self.analytic - self.mean
     inst_amp = abs(centered)
@@ -322,13 +330,13 @@ class Signal:
 
   def instantaneous_phase(self):
     '''
-    Returns instantaneous phase of Signal at timestamps
+    Returns instantaneous phase of Signal at `self.timestamps`
     '''
     return self.inst_phase.tolist()
 
   def instantaneous_freq(self):
     '''
-    Returns instantaneous frequency of Signal at timestamps
+    Returns instantaneous frequency of Signal at `self.timestamps`
     '''
     return np.gradient(self.inst_phase, self.timestamps).tolist()
 
@@ -357,14 +365,16 @@ class Signal:
 
   def spectrogram(self, win=sp.signal.windows.gaussian(30, std=5, sym=True), hop=1, mfft=200, custom_title='Spectrogram', show=True):
     '''
-    Generates spectrogram of Signal
+    Generates spectrogram of Signal. Returns [SFFT data, bounds]. \
+      Since the window has a small width, the resulting SFFT is \
+      actually slightly wider than the original Signal. The proper \
+      cut-off bounds to ensure no edge effects from the window are \
+      given as the second output.
 
     Arguments:
-      win: window for spectrogram
-      hop: hop
-      mfft:
-      custom_title: title of spectrogram
-      show:
+      win, hop, mfft: Same as for scipy.signal.ShortTimeFFT.
+      custom_title: Optional title of plot. Default is 'Spectrogram'.
+      show: `True` if plot is to be shown, `False` otherwise. Default is `True`.
     '''
     N = self.length
     ft = sp.signal.ShortTimeFFT(np.array(win), hop, self.fs, mfft=mfft)
@@ -375,10 +385,13 @@ class Signal:
     if show:
       fig, ax = plt.subplots()
       img = ax.imshow(abs(windowed_S[::-1]), cmap='viridis', aspect='auto', extent=bounds)
-      fig.suptitle(custom_title)
+      fig.suptitle('Spectrogram' if custom_title is None else custom_title)
       fig.colorbar(img)
-      ax.set_xlabel('Time (s)')
-      ax.set_ylabel('Frequency (1/s)')
+      ax.set_xlabel('Time (ms)')
+      if self.mode in ['t', 'w', 'f']:
+        ax.set_ylabel('Frequency (kHz)')
+      else:
+        ax.set_ylabel('Normalized frequency (kHz)')
       plt.show()
     return [windowed_S, bounds]
 
@@ -393,25 +406,39 @@ class Signal:
   def __matmul__(self, s2):
     return self.crosscorrelate(s2)
 
-  def autocorrelate(self, custom_title=None, show=True):
+  def autocorrelate(self):
     '''
-    Return autocorrelation plot
+    Return autocorrelation of Signal (Signal correlated with self).
     '''
     full_corr = np.correlate(self.mode_t, self.mode_t, mode='full')
     half_corr = full_corr[len(full_corr)//2:].tolist()
-    # if not show:
-    #   return half_corr
-
-    if show:
-      plt.plot(self.timestamps, half_corr)
-      plt.xlabel('Offset (s)')
-      plt.title('Autocorrelation plot' if custom_title is None else custom_title)
-      plt.show()
     return half_corr
+
+  def autocorrelation_plot(self, custom_title='Autocorrelation plot'):
+    '''
+    Return plot of autocorrelation of Signal
+
+    Arguments:
+      custom_title: Optional title of plot. Default is 'Autocorrelation plot'.
+    '''
+    plt.plot(self.timestamps, self.autocorrelate())
+    plt.xlabel('Offset (s)')
+    plt.title('Autocorrelation plot' if custom_title is None else custom_title)
+    plt.show()
 
   def plot(self, mode=None, custom_title=None):
     '''
-    don't delete this
+    Plots data series from the indicated mode. If mode is 't'/'ttilde', \
+      then the time series is plotted against `self.timestamps`. Otherwise \
+      the frequency series is plotted against `self.freqstamps`.
+
+    Similar to `get_data`, Signals initialized in 't'/'w'/'f' can only be plotted \
+      in 't'/'w'/'f' and Signals initialized in 'b'/'beta'/'ttilde' can only be \
+      plotted in 'b'/'beta'/'ttilde'
+
+    Arguments:
+      mode: See `__init__` for modes. Default is 't'/'ttilde' depending on which is defined.
+      custom_title: Optional title of plot. NOTE: Default is no title.
     '''
     if mode is None:
       if self.mode in ['t', 'f', 'w']:
@@ -419,8 +446,6 @@ class Signal:
       else:
         mode = 'ttilde'
     d = self.get_data(mode=mode)
-    # print('d', d)
-    # m = abs(max(d))
     if mode == 't':
       plt.plot(self.timestamps, d)
       plt.xlabel('Time (s)')
@@ -439,211 +464,11 @@ class Signal:
 
     plt.show()
 
-  # def scatter(self, mode='t'):
-  #   '''
-  #   don't delete this
-  #   '''
-  #   d = self.get_data(mode=mode)
-  #   plt.scatter([i/self.fs for i in range(len(d))], d, s=3)
-  #   plt.show()
-
   def as_sound(self, filename):
     '''
     Save Signal as sound file
+
+    Attributes:
+      filename: Filename to save sound file under.
     '''
     sp.io.wavfile.write(filename, self.fs, np.array(self.mode_t))
-
-  # def apply_filter(self, filter, method='default', fs=100):
-  #   return filter.solve(self, method=method, fs=fs) # probably not a great sign when importing Filter to typecheck this seems worse
-
-def as_signal(arr) -> Signal:
-  if isinstance(arr, Signal):
-    return arr
-  return Signal(mode='t', data=arr, fs=44100) # should 44.1k be default or 1
-
-if __name__ == "__main__":
-  # s1 = Signal(mode='t', data =[1, 4, -2, 3, 0])
-  # s2 = Signal(mode='f', data=np.ones(11))
-  # s3 = Signal.from_function(mode='t', func=(lambda t: np.sin (5*t**2)), fs=1000, n=2000)
-  # s4 = Signal.from_instantaneous_frequency(func=(lambda t: 1+t), init_phase=0, fs=1000, n=5000)
-  # s5 = Signal.from_instantaneous_frequency(freqs=[6-i/1000 for i in range(5000)], init_phase=0, fs=1000, n=5000)
-  # s1.plot()
-  # s2.plot()
-  # s3.plot()
-  # s4.plot()
-  # s5.plot()
-  # s6 = Signal.linear_chirp(f_init=1.4, f_final=14, fs=1000, n=2000)
-  # s6.plot()
-
-  # s6 = Signal.linear_chirp(f_init=1.5, f_final=9, fs=100, num_samples=200)
-  # xaxis = [i/1000 for i in range(len(s6))]
-  # plt.plot(xaxis, s6['t'])
-  # # plt.plot(xaxis, s6.instantaneous_phase())
-  # plt.plot(xaxis[1:-1], s6.instantaneous_freq()[1:-1])
-  # plt.show()
-
-  # s6 *= (1+np.sin([i/100 for i in range(2000)]))
-  # shift_s6 = s6+1
-  # corr = s6 @ shift_s6
-  # shift_s6.plot(custom_title='shift_s6')
-  # # corr.plot(custom_title='corr')
-  # print(len(corr))
-  # plt.plot([x/1000 for x in range(-1999, 2000)], corr)
-  # plt.title('corr')
-  # plt.show()
-
-  # old_s6 = s6
-  # new_s6 = old_s6*(1+np.sin([i/100 for i in range(2000)]))
-  # new_s6 += 1
-  # new_s6.plot()
-
-  # WHY IS THIS ENVELOPE BORKEN
-
-  # xaxis = [i/1000 for i in range(len(new_s6))]
-  # plt.plot(xaxis, new_s6['t'])
-  # # plt.plot(xaxis, s.inst_amp)
-  # upper, lower = new_s6.envelope_analytic()
-  # plt.plot(xaxis, upper)
-  # plt.plot(xaxis, lower)
-  # plt.plot(xaxis, new_s6.instantaneous_phase())
-  # plt.plot(xaxis, new_s6.instantaneous_freq())
-  # plt.show()
-
-  # s = Signal.from_function(mode='t', func=(lambda t: np.sin(60*t)), fs=200, n=1000)
-  # s.plot(custom_title='Original signal')
-  # s *= [(1100-i)*(2+np.sin(i/35))/1000 for i in range(1000)]
-  # s.plot(custom_title='Modulated signal')
-  # xaxis = [i/200 for i in range(1000)]
-  # upper, lower = s.envelope_analytic()
-  # plt.plot(xaxis, s['t'])
-  # plt.plot(xaxis, upper)
-  # plt.plot(xaxis, lower)
-  # plt.title('Envelope (from analytic signal)')
-  # plt.show()
-
-  midC = Signal.linear_chirp(f_init=200, f_final=400, fs=1000, num_samples=1000)
-  midC.spectrogram()
-  # print(len(midC))
-  # print(len(midC.moving_spectral_entropy()))
-
-  # s = Signal.from_function(mode='t', func=(lambda t: np.sin(60*t)), fs=200, n=1000)
-  # s.autocorrelate()
-
-  # s = Signal.linear_chirp(f_init=10, f_final=40, fs=2000, n=1000)
-  # s.spectrogram(mfft=100)
-  # print(s.spectral_entropy())
-  # s.plot()
-  # # xaxis = [i/200 for i in range(1000)]
-  # Hs = s.moving_spectral_entropy()
-  # plt.plot(np.linspace(0, 0.5, len(Hs)), Hs)
-  # plt.title('Moving spectral entropy')
-  # plt.show()
-
-  ###############
-
-
-  # a = [1, 4, -2, 3, 9, 0, 1, 2, 9, 3, 1]
-  # s = Signal(data=a)
-  # print(s.mode_f)
-  # for i in range(21):
-  #   print(i/2, s.at_time(i/2))
-
-  # fs = [(1)*np.exp(1j*i/100) for i in range(100)]
-  # s = Signal(mode='f', data=fs)
-  # s.plot()
-
-  # s = Signal.from_function(func=(lambda t: np.sin(5*t**2)), fs=100, n=200)
-  # # s.plot(mode='f')
-  # print(s['f'])
-  # print(abs(np.array(s['f'])))
-  # s = Signal.linear_chirp(c=2, fs=100, n=200)
-  # s.plot()
-
-  # sig = Signal.from_instantaneous_frequency(func=(lambda t: 4-2*t), fs=1000, n=1000)
-  # plt.plot(range(len(sig)), sig['t'])
-
-  # sr = 1001
-  # # s = Signal.linear_chirp(f_init=5, f_final=0.5, fs=sr, n=10*sr)
-  # s = Signal.linear_chirp(f_init=-3.1, f_final=3.1, fs=sr, n=9*sr)
-  # s.plot()
-
-  # s *= (1+np.sin([i/sr for i in range(len(s))]))
-  # # # s = Signal(mode='t', data=s['t'], fs=1000)
-
-  # xaxis = [i/sr for i in range(len(s))]
-  # # plt.plot(xaxis, s['t'])
-  # # plt.plot(xaxis, s.inst_amp)
-  # # upper, lower = s.envelope_analytic()
-  # # plt.plot(xaxis, upper)
-  # # plt.plot(xaxis, lower)
-  # plt.plot(xaxis, s.instantaneous_phase())
-  # plt.show()
-
-  # sr = 1000
-  # octave_around_middle_Cish = Signal.linear_chirp(f_init=200, f_final=400, fs=sr, n=1*sr)
-  # OC = octave_around_middle_Cish
-  # data = OC.spectrogram(hop=5)
-
-
-  # white_noise = Signal(mode='t', data=np.random.normal(0, 0.5, 22050), fs=44100)
-  # white_noise.as_sound('white_noise.wav')
-
-  # sr = 1000
-  # num = 1*sr
-  # A440 = Signal.linear_chirp(f_init=220, f_final=880, fs=sr, n=num)
-  # A440 *= (1.5+np.sin([i/sr for i in range(num)]))
-  # A440.plot()
-  # # A440 *= Signal.linear_chirp(f_init=220, f_final=880, fs=sr, n=sr)
-  # # win = [0.1, 0.5, 1, 0.5, 0.1]
-  # # win = [0.1, 1, 1, 1, 0.1]
-  # win_num_half = 49
-  # win = sp.signal.windows.gaussian(2*win_num_half+1, 1)
-  # S = A440.stft(win=win, hop=10)
-  # # print(S)
-  # lenS = len(S)
-  # l = len(S[0])
-  # xaxis = [i/sr for i in range(-win_num_half, l-win_num_half)]
-  # # moving_average = S[0]
-  # # base_freq = S[1]
-
-  # plt.plot([i/sr for i in range(len(A440))], A440['t'])
-  # # dot_width = 2
-  # # for i in range(0, win_num_half, win_num_half//5):
-  # #   fseries = S[i]
-  # #   # plt.plot(xaxis, [abs(c) for c in fseries])
-  # #   plt.scatter(xaxis, [abs(c) for c in fseries], s=dot_width)
-  # plt.show()
-
-
-  # a = np.correlate(s['t'], s['t'], mode='same')
-  # b = np.correlate(s['t'], s['t'], mode='full')
-  # c = b[len(b)//2:]
-  # plt.plot(range(len(a)), a)
-  # plt.plot(range(len(b)), b)
-  # c = s.autocorrelate()
-  # plt.plot(range(len(c)), c)
-  # plt.show()
-
-
-
-  # num = 1000
-  # func1 = (lambda t: t*(4*(2-t/1) + 2*(t/1)))
-  # args1 = [func1(i/num) for i in range(num+1)]
-  # plt.plot(range(num+1), args1)
-  # func2 = (lambda t: 4-2*t)
-  # w0 = func2(0)
-  # ws = [2*func2(i/num) for i in range(num+1)]
-  # # phases = [0 for _ in range(num+1)]
-  # # for i in range(1, num+1):
-  # #   phases[i] = phases[i-1] + (ws[i]-ws[i-1])
-  # # print(ws)
-  # # phases = np.cumsum(ws)/num
-  # phases = sp.integrate.cumulative_trapezoid(ws, dx=1/num, initial=0)
-  # # phases -= 2*w0/num
-  # args2 = phases
-  # # args2 = [phases[i]*i/num for i in range(num+1)]
-  # plt.plot(range(num+1), args2)
-  # plt.show()
-  # # print(args1)
-  # # print(args2)
-

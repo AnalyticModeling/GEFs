@@ -5,9 +5,12 @@ import matplotlib.pyplot as plt
 from Signal import Signal
 
 class OutputSignals:
+  '''
+  Output of processing Signal through a FilterBank.
+  '''
   def __init__(self, all_signals, graph):
     '''
-    Users probably shouldn't make their own instances
+    Users should not be personally instantiating these objects.
     '''
     if not all(isinstance(s, Signal) for s in all_signals): raise TypeError('All inputs to OutputSignals should be Signal objects')
     self.insignal = all_signals[0]
@@ -18,22 +21,39 @@ class OutputSignals:
     self._uid2graphid = {self.outsignals[i].uid:i+1 for i in range(len(self.outsignals))}
     if len(self.outsignals) != len(self._uid2graphid):
       raise Exception('Signal UIDs must in fact be unique')
-    self._uid2graphid[-1] = 0 # technically breaks if UID gets set to -1...
+    self._uid2graphid[-1] = 0 # technically breaks if UID gets set to -1... (which is why this should be treated as protected)
     self._graphid2uid = {v:k for k, v in self._uid2graphid.items()}
 
   def __len__(self):
     return len(self.outsignals)
 
   def get_signal_from_uid(self, uid):
+    '''
+    Get Signal in OutputSignals given its UID
+
+    Arguments:
+      uid: UID of Signal to be identified
+    '''
     return self.outsignals[self._uid2graphid[uid]-1]
 
   def get_source_uid(self, uid):
+    '''
+    Given a UID corresponding to a Signal under consideration, provides the UID \
+      of the original Signal that was run through a Filter to generate the Signal under consideration.
+
+    Returning -1 means the Signal fed into the Filter was the original `self.insignal`.
+
+    Arguments:
+      uid: UID of Signal whose source is desired
+    '''
     return self._graphid2uid[self.graph.parent[self._uid2graphid[uid]]]
 
   def correlogram(self, custom_title='Correlogram'):
     '''
-    draw correlogram
-    Y AXIS SHOULD BE LABELED OR ELSE NO CLUE HOW HIGH IT IS
+    Draws correlogram, i.e. the plot of all possible pairs of correlations between Signals in OutputSignals object.
+
+    Arguments:
+      custom_title: Optional title of plot. Default is 'Correlogram'.
     '''
     n = len(self.outsignals)
     fullxaxis = [i/self.signal_fs for i in range(-self.signal_length+1, self.signal_length)]
@@ -52,9 +72,6 @@ class OutputSignals:
         subgraph.plot(fullxaxis, corr)
         if i != n-1:
           subgraph.set_xticks([])
-        # if j != 0:
-        #   subgraph.set_yticks([])
-        # axs[i][j].set_axis_off()
 
     for i in range(n-1):
       axs[-1][i].set_xlabel(f'Signal {self.outsignals[i].uid}')
@@ -66,13 +83,17 @@ class OutputSignals:
 
     plt.show()
 
-  def autocorrelates(self, custom_title='Autocorrelates'):
+  def autocorrelates(self, custom_title='All autocorrelates'):
+    '''
+    Simultaneously plots all autocorrelations of Signals in OutputSignals object.
+
+    Arguments:
+      custom_title: Optional title of plot. Default is 'All autocorrelates'.
+    '''
     n = len(self.outsignals)
     fig, axs = plt.subplots(n)
     for i in range(n):
       subgraph = axs[i]
-      # print('testing', len(self.outsignals[i].autocorrelate()))
-      # print(len(range(self.signal_length)))
       subgraph.plot(range(self.signal_length), self.outsignals[i].autocorrelate())
       subgraph.set_ylabel(f'Signal {self.outsignals[i].uid}')
 
@@ -82,6 +103,13 @@ class OutputSignals:
     plt.show()
 
   def correlate_with(self, signal, custom_title='Correlations'):
+    '''
+    Simultaneously plots all correlations of the Signal `signal` with \
+      all Signals in this OutputSignals object.
+
+    Arguments:
+      custom_title: Optional title of plot. Default is 'Correlations'.
+    '''
     n = len(self.outsignals)
     fig, axs = plt.subplots(n)
     for i in range(n):
@@ -93,52 +121,3 @@ class OutputSignals:
     fig.suptitle(custom_title)
 
     plt.show()
-
-if __name__ == "__main__":
-  # isignal = Signal.linear_chirp(f_init=1, f_final=10, fs=1000, n=10000)
-  # # d = isignal['t']
-  # isignal.plot()
-  # plt.plot([i/isignal.fs for i in range(len(d))], d)
-  # plt.show()
-
-  ########
-
-  sr = 100
-  num = 1000
-  isignal = Signal.linear_chirp(f_init=1, f_final=1, fs=sr, n=num)
-  s1 = Signal.linear_chirp(f_init=5, f_final=0.5, fs=sr, n=num)
-  s1 *= (1.5+np.sin([i/sr for i in range(num)]))
-  s2 = Signal.linear_chirp(f_init=2, f_final=1, fs=sr, n=num)
-  s2 *= (1.5+np.sin([i/sr+2 for i in range(num)]))
-  s3 = Signal.linear_chirp(f_init=5, f_final=2, fs=sr, n=num)
-  s3 *= (1.5+np.sin([i/sr+1 for i in range(num)]))
-  # xaxis = [i/sr for i in range(num)]
-  # plt.plot(xaxis, s1['t'])
-  # plt.plot(xaxis, s2['t'])
-  # plt.plot(xaxis, s3['t'])
-  # # u1, l1 = s1.envelope_analytic()
-  # # plt.plot(xaxis, u1)
-  # # plt.plot(xaxis, l1)
-  # # u2, l2 = s2.envelope_analytic()
-  # # plt.plot(xaxis, u2)
-  # # plt.plot(xaxis, l2)
-  # plt.show()
-
-  # print(isignal.uid, s1.uid, s2.uid)
-
-  # fullxaxis = [i/sr for i in range(-num+1, num)]
-  # plt.plot(fullxaxis, s1 @ s2)
-  # plt.show()
-
-  os = OutputSignals([isignal, s1, s2, s3], None)
-  # os.add(s1)
-  # os.add(s2)
-  # os.add(s3)
-  os.correlogram()
-  os.autocorrelates()
-  # print(len(isignal))
-  # print(len(s1))
-  os.correlate_with(isignal)
-
-
-

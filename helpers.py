@@ -3,7 +3,6 @@ import numpy as np
 import scipy.optimize
 import scipy.special
 import matplotlib.pyplot as plt
-import matplotlib.ticker
 
 def mag2db(x):
   return 20*np.log10(x)
@@ -90,7 +89,6 @@ def chars2params(Psi, n=10, n2=3):
   return {'Ap': float(Ap), 'bp': float(bp), 'Bu': float(Bu)}
 
 def computedfiltercharacteristics(tfunc=None, data=None, betas=None, n=10., n2=3.):
-  # let user input n?
   '''
   Given filter characteristics, computes approximate parameters from transfer function
   tfunc: transfer function
@@ -100,14 +98,12 @@ def computedfiltercharacteristics(tfunc=None, data=None, betas=None, n=10., n2=3
   def find_nearest_index(arr, x):
     return np.argmin(abs(arr-x))
 
-  # NOTE_TO_SELF: calculations done in cycles (so period = 1) and
+  # NOTE_TO_SELF: calculations done in cycles (so period = 1)
 
   if betas is None: betas = np.geomspace(0.01, 10, 10000)
   if data is None:
     if tfunc is None: raise Exception('Transfer function should be provided in either function or list form')
     data = np.array([tfunc(x*1j) for x in betas])
-  # plt.plot(range(len(data)), abs(data))
-  # plt.show()
   phases_raw = np.unwrap(np.angle(data))
   phases_cyc = phases_raw/(2*np.pi)
 
@@ -224,33 +220,3 @@ def plot_2x1(xaxis, upper, lower, xlabel=None, upper_ylabel=None, lower_ylabel=N
     fig.suptitle(custom_title)
 
   plt.show()
-
-if __name__ == "__main__":
-  func = lambda t: np.exp(-1/15*(t-20)**2) * np.cos(t)
-  timestamps = [i/100 for i in range(5000)]
-  data = [func(t) for t in timestamps]
-  Ap = 0.1
-  bp = 1
-  Bu = 2
-  y_coeffs = np.polynomial.polynomial.polypow([Ap**2+bp**2, 2*Ap, 1], Bu)
-  def update(t, y):
-    LHS = np.interp(t, timestamps, data)
-    RHS = sum(y[i]*y_coeffs[i] for i in range(len(y)))
-    return (y[1:]+[LHS-RHS])
-  
-  # def ttildeODE(t, y, f, modelConst):
-  #   Ap = modelConst['Ap']
-  #   bp = modelConst['bp']
-  #   Bu = modelConst['Bu']
-  #   y_coeffs = np.polynomial.polynomial.polypow([Ap**2+bp**2, 2*Ap, 1], Bu)
-  #   LHS = f(t)
-  #   RHS = sum(y[i]*y_coeffs[i] for i in range(len(y)))
-  #   return (y[1:] + [LHS-RHS])
-  
-  # cons = {'bp':1, 'Bu':2, 'Ap':0.1}
-  # print(np.interp(20, timestamps, data))
-  # print(func(20))
-
-  # print(ttildeODE(20, [1, 2, 3, 4], func, cons))
-  print(update(20, [1, 2, 3, 4]))
-  # diffeq_solve_wrapper()

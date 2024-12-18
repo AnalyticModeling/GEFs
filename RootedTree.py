@@ -37,11 +37,3 @@ class RootedTree:
     for p in q:
       outputs[p] = func(outputs[self.parent[p]], p)
     return outputs
-
-if __name__ == "__main__":
-  rt = RootedTree()
-  rt.add_series(3)
-  rt.add_parallel(3)
-  filters = [2, 3, 4, 2, 3, 4]
-  o = rt.propagate_down(1, (lambda x, y: x*filters[y-1]))
-  print(o) # [1, 2, 6, 24, 2, 3, 4]

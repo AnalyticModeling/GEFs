@@ -9,37 +9,23 @@ from FilterBank import FilterBank
 import helpers
 
 class Cochlea(FilterBank):
+  '''
+  Model of Cochlea (a subclass of FilterBank)
+  '''
   def __init__(self, types=None, species=None, CF0=20, length=20, l_factor=3.8, xs=None, cfs=None, rho=1.000, Ap=None, bp=None, Bu=None, gain_const=None, peak_magndb=None, Bpeak=None, fpeak=None, phiaccum=None, Nbeta=None, Nf=None, Qerb=None, ERBbeta=None, ERBf=None, Qn=None, Qn2=None, BWndBbeta=None, BWndBf=None, BWn2dBbeta=None, BWn2dBf=None, Sbeta=None, Sf=None, n=10, n2=3, betas=None, freqs=None):
     '''
-    Cochlea. All relevant properties can be calculated from beta
+    Initializes Cochlea. Most arguments are the same as for `FilterBank` object
 
     Attributes:
-      CF0: characteristic frequency of base of cochlea (in kHz)
-      length: length of cochlea (in mm)
-      l_factor: constant factor in cochlea (lowercase l)
-      xs: positions of filters along cochlea
-      cfs: characteristic frequencies of filters along cochlea
-      rho: density of cochlear fluid
-      Other arguments are defined identically to those in Filter
+      CF0: characteristic frequency (kHz) of base of cochlea
+      length: length of cochlea (mm)
+      l_factor: constant factor for cochlear model (mm)
+      xs: positions of filters (mm) along cochlea
+      cfs: characteristic frequencies (kHz) of filters along cochlea
+      rho: density of cochlear fluid (g/cm^3)
+      Other arguments are defined identically to those in `Filter`/`FilterBank` \
+        and the restrictions on lengths of vectors are the same as for `FilterBank`
     '''
-    # if species is not None:
-    #   if species == 'chinchilla':
-    #     CF0 = 28.131
-    #     l_factor = 3.6649
-    #     length = 35
-    #   elif species == 'human':
-    #     CF0 = 20.823
-    #     l_factor = 7.2382
-    #     length = 20
-    #   # dramatic different filter at base?
-    #   xs = np.linspace(0, length, 5)[1:]
-    #   Ap = [0.3768 * np.exp(-0.1366 * CF0 * np.exp(-x/l_factor)) for x in xs] # this seems improbable
-    #   bp = [1., 1., 1., 1.]
-    #   Bu = [3.714 * np.exp(0.03123 * CF0 * np.exp(-x/l_factor)) for x in xs] # same here
-    #   # print(Ap, bp, Bu)
-    # else:
-    #   l_factor = 3.8
-
     if species is not None:
       CF0, l_factor, length = self._given_species(species)
 
@@ -55,7 +41,6 @@ class Cochlea(FilterBank):
     self.cf = (lambda x: CF0*np.exp(-x/l_factor))
     if cfs is None:
       if xs is None:
-        # raise Exception('Either a list of all locations along cochlea or a list of all characteristic frequencies must be provided') # should this be necessary
         xs = np.linspace(0, length, num_filters)
       cfs = [self.cf(x) for x in xs]
     else:
@@ -74,7 +59,6 @@ class Cochlea(FilterBank):
     bp_apex = apexmost_filter.get_params()['bp']
     self.bp_apex = bp_apex
     Bu_apex = apexmost_filter.get_params()['Bu']
-    # print('apex', Ap_apex, bp_apex, Bu_apex)
 
     self.Ap_fun = (lambda x: np.exp(np.interp(x, self.xs, np.log(np.array(Ap)))))
     self.bp_fun = (lambda x: np.exp(np.interp(x, self.xs, np.log(np.array(bp)))))
@@ -137,17 +121,15 @@ class Cochlea(FilterBank):
         l_factor = 7.2382
         length = 20
       # elif species == 'guinea pig' or species == 'guineapig':
-      #   CF
-      # dramatic different filter at base?
+      # elif species == 'mouse'
       xs = np.linspace(0, length, 5)[1:]
       Ap = [0.3768 * np.exp(-0.1366 * CF0 * np.exp(-x/l_factor)) for x in xs] # this seems improbable
       bp = [1., 1., 1., 1.]
       Bu = [3.714 * np.exp(0.03123 * CF0 * np.exp(-x/l_factor)) for x in xs] # same here
-      # print(Ap, bp, Bu)
     else:
       l_factor = 3.8
 
-    return CF0, l_factor, length
+    return (CF0, l_factor, length)
 
   def plot_wavenumber(self, betas=None, setting='realimag', custom_title='Wavenumber (k)', show=True, phase_in_rad=True):
     '''
@@ -156,9 +138,9 @@ class Cochlea(FilterBank):
     Arguments:
       betas: normalized frequencies to evaluate wavenumber at
       setting: one of 'magnphase', 'realimag', 'nichols', 'nyquist'. \
-      This specifies the type of graph used to plot the wavenumber
-      custom_title:
-      show:
+        This specifies the type of graph used to plot the wavenumber
+      custom_title: Optional title of plot. Default is 'Wavenumber (k)'.
+      show: `True` if plot is to be shown, `False` otherwise. Default is `True`.
       phase_in_rad: Show phase in radians if True or in cycles otherwise
     '''
     # default of rad/cyc seems to be different between magnphase and nichols?
@@ -199,7 +181,15 @@ class Cochlea(FilterBank):
 
   def plot_impedance(self, betas=None, setting='realimag', custom_title='Normalized impedance (Z_norm)', show=True, phase_in_rad=True):
     '''
-    Almost identical to plot_wavenumber except all graphs are generated with Z_norm not wavenumber
+    Almost identical to plot_wavenumber except all graphs are generated with Z_norm not wavenumber.
+
+    Arguments:
+      betas: normalized frequencies to evaluate normalized impedance at
+      setting: one of 'magnphase', 'realimag', 'nichols', 'nyquist'. \
+        This specifies the type of graph used to plot the normalized impedance
+      custom_title: Optional title of plot. Default is 'Normalized impedance (Z_norm)'.
+      show: `True` if plot is to be shown, `False` otherwise. Default is `True`.
+      phase_in_rad: Show phase in radians if True or in cycles otherwise
     '''
     # plot Z and normalized Z
     if betas is None:
@@ -231,171 +221,35 @@ class Cochlea(FilterBank):
         helpers.plot_with_arrow(reals, imags, xlabel='Re(Z_norm) (Ω/???)', ylabel='Im(Z_norm) (Ω/???)', custom_title=custom_title)
     return [betas, reals, imags, magns, phases]
 
-  def signal_response_heatmap(self, signal):
+  def signal_response_heatmap(self, signal, len_xs=20, custom_title='Signal Heatmap', show=True):
     '''
-    Heatmap of Cochlear response to Signal. Successively more apical part \
-    of the Cochlea are checked to see their response to the same Signal
+    Heatmap of Cochlear response to Signal. Successively more apical parts \
+      of the Cochlea are checked to see their response to the same Signal, \
+      which neatly shows which parts of the Cochlea are most response to what parts of the Signal
+
+    Arguments:
+      signal: Signal that Cochlea is processing
+      len_xs: Gives number of points along Cochlea to filter Signal at. Default is 20.
+      custom_title: Optional title of plot. Default is 'Signal Heatmap'.
+      show: `True` if plot is to be shown, `False` otherwise. Default is `True`.
     '''
-    def solvehere(data, fs, Ap, bp, Bu):
-      p = -Ap + 1j*bp
-      tf = lambda s: ((s - p) * (s - p.conjugate()))**(-Bu)
-      X = sp.fft.rfft(data)
-      freqs = sp.fft.rfftfreq(len(data), 1/fs)
-      # freqs = np.linspace(0, 1, len(X)) * fs/2 #/ self.cf(x)
-      # freqs /= max(abs(freqs))
-      # plt.plot(freqs, abs(tf(1j*freqs)))
-      # plt.title('bodelike')
-      # plt.show()
-      tf_vals = tf(1j*freqs)
-      tf_vals /= max(abs(tf_vals))
-      Y = tf_vals*X
-      y = sp.fft.irfft(Y, len(data))
-      return y
-
-    def paramhere(x):
-      return {'Ap':0.3768*np.exp(-0.1366*self.cf(x)), 'bp':1, 'Bu':3.714*np.exp(-0.03123*self.cf(x))}
-
     sigs = []
     cfs = []
-    # for x in np.linspace(0.025, self.cochlea_length, 30):
-    #   fil = self.filter_at_location(x)
-    #   # print(fil.get_params()['Ap'])
-    #   # print(fil.get_computed_chars()['Bpeak'])
-    #   cfs += [round(fil.cf, 2)]
-    #   # print(fil.cf)
-    #   sig = fil.solve(signal, method='tf')
-    #   # sig.plot()
-    #   # sigs += [[abs(v)/maxsig for v in sig.mode_t]]
-    #   sig = sig.envelope_analytic()[0]
-    #   maxsig = max(sig)
-    #   sigs += [[v/maxsig for v in sig]]
-    # print(sigs)
-    signal.plot()
-    # print(self.cochlea_length)
-    for x in np.linspace(0.025, self.cochlea_length, 20):
-    # for x in 
+    # signal.plot()
+    for x in np.linspace(0.025, self.cochlea_length, len_xs):
       fil = self.filter_at_location(x)
-      # params = fil.get_params()
       cfs += [round(self.cf(x), 2)]
-      # print('fs', signal.fs)
-      # sig = fil.solve(signal, method='tf')
-      # print(self.cf(x), fil.cf)
-      # sig = Signal(data=solvehere(signal['t'], signal.fs/fil.cf, **params))
       sig = fil.solve(signal, method='tf')
-      # sig.plot(custom_title=str(self.cf(x)))
       sig = sig.envelope_analytic()[0]
       sigs += [sig]
-    # print(sigs)
 
-
-    fig, ax = plt.subplots()
-    img = ax.imshow(sigs, cmap='viridis', aspect='auto')
-    # fig.suptitle(custom_title)
-    # fig.colorbar(img)
-    ax.set_xlabel('Time (s)')
-    ax.set_ylabel('Frequency (1/s)')
-    plt.yticks(range(len(cfs)), cfs)
-    plt.show()
-
-
-  # def scale_signal(self, filter, signal, unscale=False):
-  #   '''
-  #   backwards?
-  #   '''
-  #   if not isinstance(signal, Signal):
-  #     raise Exception()
-  #   scale_factor = 2*np.pi * self.cf(self.xs[filter.uid])
-  #   if unscale:
-  #     return Signal(signal['t'], fs=signal.fs*scale_factor)
-  #   else:
-  #     return Signal(signal['t'], fs=signal.fs/scale_factor)
-
-if __name__ == "__main__":
-  # print(np.linspace(0, 1, 2, endpoint=True))
-  # print(np.interp(0, [1], [1]))
-  # c = Cochlea(Ap=[0.3768*np.exp(0.01*i) for i in range(2)], bp=[0.5, 2], Bu=[3.714*np.exp(0.01*i) for i in range(2)])
-  # c = Cochlea(Ap=[0.3768*np.exp(0.01*i) for i in range(4)], bp=[0.5, 1, 1.5, 2], Bu=[3.714*np.exp(0.01*i) for i in range(4)], length=3.8)
-  # c = Cochlea(species='chinchilla')
-  # c.bode_plot()
-  # c.bode_plot(peak_magn=None)
-  # f = c.filters[3]
-  # f.bode_plot(peak_magn=None)
-  # print(c.bode_plot())
-  # c.plot_wavenumber(setting='realimag')
-  # c.plot_wavenumber(setting='magnphase')
-  # c.plot_wavenumber(setting='nichols')
-  # c.plot_wavenumber(setting='nyquist')
-
-  # c.plot_impedance(setting='realimag')
-  # c.plot_impedance(setting='magnphase')
-  # c.plot_impedance(setting='nichols')
-  # c.plot_impedance(setting='nyquist')
-
-  # c = Cochlea.five_param(types='V', aAp=0.3768, bAp=-0.1366, bp=[0.2, 0.5, 2, 5, 15], aBu=3.714, bBu=0.03123, xs=[i for i in range(5)])
-  c = Cochlea.five_param(types='V', aAp=0.3768, bAp=-0.1366, bp=[1, 1, 1, 1, 1], aBu=3.714, bBu=0.03123, xs=[i for i in range(5)])
-  # func = lambda t: np.exp(-1/15*(t-20)**2) * np.cos(t)
-  # sig = Signal(data=[func(t) for t in range(4000)], fs=40)
-  pairs = [(1.5, 200), (8, 400), (1.5, 700), (0.3, 400)]
-  def tones(t):
-    ans = 0
-    for i in range(4):
-      fi, ti = pairs[i]
-      ans += np.exp(-((t-ti)/50)**2) * np.sin(2*np.pi*fi*t)
-    return ans
-  sig = Signal(mode='t', data=[tones(t/100) for t in range(100000)], fs=100)
-  # sig.plot()
-  # fil = c.filter_at_location(3)
-  # print(fil.get_params())
-  # fil.bode_plot(freqs=np.linspace(2, 10, 10000))
-
-  # newfil = Filter(Ap=0.01, bp=1, Bu=3, cf=.6)
-  # newfil.bode_plot()
-  # newfil.solve(sig, method='ode').plot()
-  c.signal_response_heatmap(sig)
-
-
-
-  # example = 'red_truth'
-  # samplerate, data = sp.io.wavfile.read(f'test_signals/{example}.wav')
-  # print('example sr:', samplerate)
-  # resample_factor = data.shape[0]//10_000
-  # samplerate /= resample_factor
-  # if len(data.shape) == 1:
-  #   mono = data
-  # else:
-  #   mono = [sum(d) for d in data]
-  # mono = [mono[i] for i in range(0, len(mono), resample_factor)]
-  # mono = mono[:1000]
-  # s = Signal(mode='t', data=mono, fs=samplerate)
-  # s.plot()
-
-  # s = Signal.linear_chirp(f_init=1, f_final=3, fs=1000, n=2000)
-  # osigs = c.process_signal(s)
-  # # print(osigs)
-  # print(len(osigs))
-  # for s in osigs.outsignals[3:]:
-  #   plt.plot(s.timestamps, s['t'])
-  # # s1 = osigs.outsignals[0]
-  # plt.show()
-
-  # f.solve(s).plot()
-
-  ###
-
-  # osigs = c.process_signal(s)
-  # for sig in osigs.signals:
-  #   sig /= max(sig['t'])
-  #   # yaxis = [abs(v) for v in sig['f']]
-  #   # plt.plot(range(len(sig['f'])), yaxis)
-  #   plt.plot(sig.timestamps, sig['t'])
-  # # osigs.correlogram()
-
-  # # for fil in c.filters:
-  # #   if not isinstance(fil, Filter): raise Exception()
-  # #   sig = fil.solve(s)
-  # #   sig /= max(sig['t'])
-  # #   plt.plot(sig.timestamps, sig['t'])
-  # plt.show()
-
-  # c.plot_wavenumber()
-  # c.plot_impedance()
+    if show:
+      fig, ax = plt.subplots()
+      img = ax.imshow(sigs, cmap='viridis', aspect='auto')
+      fig.suptitle(custom_title)
+      fig.colorbar(img)
+      ax.set_xlabel('Time (s)')
+      ax.set_ylabel('Frequency (1/s)')
+      plt.yticks(range(len(cfs)), cfs)
+      plt.show()
+    return sigs

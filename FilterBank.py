@@ -5,20 +5,32 @@ from RootedTree import RootedTree
 
 import warnings
 import numpy as np
-import scipy as sp
+# import scipy as sp
 import matplotlib.pyplot as plt
 import matplotlib
 import matplotlib.ticker
 
 class FilterBank:
+  '''
+  Object storing multiple Filters in a graph structure to modeling being able to feed a Signal into a Filter and having the output feed into another Filter.
+  '''
   def __init__(self, topology=None, filters=None, type='P', ir=None, tf=None, coeffs=None, roots=None, Ap=None, bp=None, Bu=None, gain_const=None, peak_magndb=None, Bpeak=None, fpeak=None, phiaccum=None, Nbeta=None, Nf=None, Qerb=None, ERBbeta=None, ERBf=None, Qn=None, Qn2=None, BWndBbeta=None, BWndBf=None, BWn2dBbeta=None, BWn2dBf=None, Sbeta=None, Sf=None, n=10, n2=3, betas=None, freqs=None, cf=None):
     '''
-    Initialize new filterbank
-    topology: if specified (either as 'parallel' or 'series'), generates
-      filterbank with filters taking on params and in the specified topology
-    params: list of three lists of Ap's, bp's, Bu's, all of same length
+    Initialize new filterbank. Most arguments are the same as for `Filter` object, \
+      though if two arguments are vectors, they must be the same length. Scalars will \
+      be broadcast to the same same as vectors. If everything is a scalar, it is all \
+      interpreted as a vector of length 1.
 
-    ALSO HAVE IN TERMS OF F NOT JUST BETA
+    'parallel' means Filters all take input from the same source. 'series' means \
+      Filters take
+
+    Arguments:
+      topology: If specified, initializes filterbank with filters taking on params \
+        and in the specified topology. There are two options:
+        - 'parallel': all Filters take input from the same source
+        - 'series': each Filter takes input from the output of the Filter before it in sequence
+      filters: If a list of Filters already exists, these Filters can just be placed into \
+        the FilterBank, skipping having to initialize everything
     '''
     self.filters = []
 
@@ -52,8 +64,6 @@ class FilterBank:
           self.filters += [Filter(**scalar_args, **{k:vector_args[k][i] for k in vector_args})]
     # self.filters is now fully defined
 
-    # testing: test arrays of different lengths, including 0, 1, many with or without scalars (incl. len 0 and scalars, which should work but be rather silly)
-
     self.graph = RootedTree()
     l = len(self.filters)
     if l == 1:
@@ -79,23 +89,47 @@ class FilterBank:
 
   def get_filter_from_uid(self, uid):
     '''
-    Identify filter from uid
-    uid - uid
+    Get Filter in FilterBank given its UID
+
+    Arguments:
+      uid: UID of Filter to be identified
     '''
     return self.filters[self._uid2graphid[uid]-1]
 
   def get_source_uid(self, uid):
+    '''
+    Given a UID corresponding to a Filter, provides the UID of the source of that Filter. \
+      Returning -1 means no other Filter feeds into said Filter.
+
+    Arguments:
+      uid: UID of Filter whose source is desired
+    '''
     return self._graphid2uid[self.graph.parent[self._uid2graphid[uid]]]
 
   def get_uids_fed_into(self, uid):
+    '''
+    Given a UID corresponding to a Filter, provides the UIDs of the 'children' \
+      of that Filter (i.e. the Filters that accept the output of that Filter as input).
+
+    Arguments:
+      uid: UID of Filter whose children are desired
+    '''
     return [self._graphid2uid[i] for i in self.graph.child[self._uid2graphid[uid]]]
 
   def add(self, filter, source=None, source_uid=-1):
     '''
-    Add filter 'filter' to network, with source provided by 'source' (or can be given by UID).
+    Add Filter 'filter' to network.
+
+    Either the source filter can be directly provided or the source can be referred to by UID.
+
+    A source UID of -1 corresponds to the Filter directly being fed input not from any other Filter.
+
     Source must be in network already.
-    Supports various topologies.
-    source_uid = -1 implies feed from input
+
+    Arguments:
+      filter: Filter to be added
+      source: Source Filter
+      source_uide: UID of source Filter. Default is -1
     '''
     self.filters += [filter]
     graph_id = len(self.filters)
@@ -108,9 +142,14 @@ class FilterBank:
       raise Exception('Invalid source')
     self.graph.add(source_id=graph_parentid)
 
-  def process_signal(self, signal, method='default'):
+  def process_signal(self, signal, method=None):
     '''
-    Take input signal, feed through all filters
+    Given a Signal, feeds the Signal through the FilterBank and returns \
+      an OutputSignals object. These are guaranteed to share a topology.
+
+    Arguments:
+      signal: Signal to processed by FilterBank
+      method: Method used to process. See `Filter.solve()` for more details
     '''
     def process(filter_input, graph_id):
       fil = self.get_filter_from_uid(self._graphid2uid[graph_id])
@@ -119,9 +158,16 @@ class FilterBank:
     outputs = self.graph.propagate_down(signal, process)
     return OutputSignals(outputs, self.graph)
 
-  def bode_plot(self, num_samples=1000, freqs=None, peak_magndb=1, custom_title='Bode plot', show=True):
+  def bode_plot(self, freqs=None, peak_magndb=1, custom_title='Bode plot', show=True):
+    '''
+    Generate simultaneous Bode plots of all Filters in FilterBank.
+
+    Returns list of quadruples of the form [x-axis (frequency) data, magnitudes (dB), phases (cycles), filter UID].
+
+    See `Filter.bode_plot` for more details on arguments.
+    '''
     if freqs is None:
-      freqs = np.linspace(0.1, max(fil.get_computed_chars()['Bpeak'] for fil in self.filters)+1, num_samples)
+      freqs = np.geomspace(0.01, 3*max(fil.get_computed_chars()['Bpeak'] for fil in self.filters), 10000)
     fils = [fil.bode_plot(freqs=freqs, peak_magndb=peak_magndb, show=False)+[fil.uid] for fil in self.filters]
 
     if show:
@@ -136,106 +182,12 @@ class FilterBank:
       ax1.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.1f')) # pick better formatter
       ax1.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
       ax1.set_ylabel('Magnitude (dB)')
-      # ax1.legend()
+
       ax2.xaxis.set_major_locator(locator=matplotlib.ticker.LogLocator(subs=(1, 2, 5)))
       ax2.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.1f')) # pick better formatter
       ax2.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
       ax2.set_ylabel('Phase (radians)')
       ax2.set_xlabel('Normalized frequency')
-      # ax2.legend()
+
       plt.show()
     return fils
-
-if __name__ == "__main__":
-  isignal = Signal.linear_chirp(f_init=1, f_final=10, fs=1000, num_samples=10000)
-  # isignal = Signal(data=[1])
-  isignal.plot()
-
-  fb = FilterBank(topology='series', Ap=0.2, bp=[0.5, 1, 1.5], Bu=[3, 4, 5])
-  fb.bode_plot(samples=np.linspace(0.05, 2.5, 10000))
-
-  u = fb.filters[0].uid
-  print(fb.get_filter_from_uid(u).uid == u) # True
-
-  os = fb.process_signal(isignal, method='tf')
-  f1 = fb.filters[0]
-
-  # isignal = Signal.from_function(mode='t', func=(lambda t: np.sin(60*t)), fs=200, n=1000)
-  # isignal *= [(1100-i)*(2+np.sin(i/35))/1000 for i in range(1000)]
-  # isignal.plot()
-
-  # f1 = Filter(Bpeak=1.5, Ncyc=11.1, phiaccum=3.5)
-  # f1.bode_plot()
-  # s1 = f1.solve(isignal, method='tf')
-  # s1.plot()
-  # for s in os.outsignals:
-  #   s.plot()
-
-
-
-
-  #########
-
-  # isig = Signal.from_function(func=np.sin, fs=100, n=1000)
-  # plt.plot(isig.timestamps, isig['t'])
-  # # isig.plot()
-  # num = 4
-  # bplist = np.linspace(0.5, 1.5, num)
-  # fs = FilterBank(topology='parallel', Ap=[0.1 for _ in range(4)], bp=bplist, Bu=[3 for _ in range(4)])
-  # # fs.bode_plot()
-  # osigs = fs.process_signal(isig)
-  # # osigs.correlogram()
-  # # f1, f2, f3 = fs.filters
-  # for sig in osigs.outsignals:
-  #   sig /= max(sig['t'])
-  #   plt.plot(sig.timestamps, sig['t'])
-  # #   sig.plot()
-  # # s1, s2, s2 = osigs.signals
-  # # s1 /= max(s1['t'])
-  # # s2 /= max(s2['t'])
-  # # plt.plot(s1.timestamps, s1['t'])
-  # # plt.plot(s2.timestamps, s2['t'])
-  # plt.show()
-
-  # # isig = Signal.from_function(func=np.sin, fs=100, n=1000)
-  # # plt.plot(isig.timestamps, isig['t'])
-  # # # isig.plot()
-  # # num = 4
-  # # fs = FilterBank(topology='parallel', )
-  # # # fs.bode_plot()
-  # # osigs = fs.process_signal(isig)
-  # # # osigs.correlogram()
-  # # # f1, f2, f3 = fs.filters
-  # # for sig in osigs.signals:
-  # #   sig /= max(sig['t'])
-  # #   plt.plot(sig.timestamps, sig['t'])
-  # # #   sig.plot()
-  # # # s1, s2, s2 = osigs.signals
-  # # # s1 /= max(s1['t'])
-  # # # s2 /= max(s2['t'])
-  # # # plt.plot(s1.timestamps, s1['t'])
-  # # # plt.plot(s2.timestamps, s2['t'])
-  # # plt.show()
-
-  # print(np.array([1, 2, 3]))
-
-  # isig = Signal.from_function(func=np.sin, fs=100, n=1000)
-  # plt.plot(isig.timestamps, isig['t'])
-  # # isig.plot()
-  # num = 4
-  # bplist = np.linspace(0.5, 1.5, num)
-  # fs = FilterBank(topology='parallel', Ap=[0.1 for _ in range(4)], bp=bplist, Bu=[3 for _ in range(4)])
-  # # fs.bode_plot()
-  # osigs = fs.process_signal(isig)
-  # # osigs.correlogram()
-  # # f1, f2, f3 = fs.filters
-  # for sig in osigs.outsignals:
-  #   sig /= max(sig['t'])
-  #   plt.plot(sig.timestamps, sig['t'])
-  # #   sig.plot()
-  # # s1, s2, s2 = osigs.signals
-  # # s1 /= max(s1['t'])
-  # # s2 /= max(s2['t'])
-  # # plt.plot(s1.timestamps, s1['t'])
-  # # plt.plot(s2.timestamps, s2['t'])
-  # plt.show()

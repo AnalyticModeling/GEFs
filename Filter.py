@@ -41,14 +41,8 @@ class Filter:
       If inputs are only in terms of normalized frequencies, `cf` is optional (but will default to 1 \
       for implementation purposes)
 
-    `betas`/`freqs`
-
-    phiaccum is in radians, Nbeta/Nf is in cycles.
-
-    All transfer functions will end up as
-
     Arguments:
-      ir: Impulse response (function from t (s) to real data (anything but often kPa), e.g. `lambda t: np.exp(-t)`)
+      ir: Impulse response (function from t (ms) to real data (anything but often kPa), e.g. `lambda t: np.exp(-t)`)
       tf: Transfer function (function from s = j*frequency (kHz) to real data (anything but often kPa), e.g. `lambda s: 1/(1+s)`)
       coeffs: Coefficients of rational transfer function. [[1, 2], [3, 4, 5]] corresponds to the transfer function `lambda s: (1+2*s)/(3+4*s+5*s**2)`
       roots: Zeros and poles of rational transfer function. [[1], [1+2j, 1-2j]] corresponds to the transfer function `lambda s: (s-1)/((s-(1+2j))*(s-(1-2j)))`
@@ -61,7 +55,7 @@ class Filter:
       phiaccum, Qerb, Qn, Qn2: Filter characteristics that don't rely on whether or not the filter is in defined in terms of normalized or unnormalized characteristics. \
         Note phiaccum is in radians
       n, n2: Subscripts of Qn and Qn2 if applicable
-      betas, freqs: Values of beta/f to use to computationally evaluate e.g. filter characteristics. In kHz
+      betas, freqs: Values of beta/f (kHz) to use to computationally evaluate e.g. filter characteristics.
       cf: Characteristic frequency of filter
     '''
     self.uid = self._num_filters_made
@@ -72,8 +66,7 @@ class Filter:
     has_coeffs = (coeffs is not None)
     has_roots = (roots is not None)
     has_params = any(param is not None for param in [Ap, bp, Bu])
-    # the following is incomplete
-    has_chars = any(characteristic is not None for characteristic in [Bpeak, phiaccum, Nbeta, Qerb, Qn, Qn2, Sbeta])
+    has_chars = any(characteristic is not None for characteristic in [Bpeak, fpeak, phiaccum, Nbeta, Nf, Qerb, ERBbeta, ERBf, Qn, Qn2, BWndBbeta, BWndBf, BWn2dBbeta, BWn2dBf, Sbeta, Sf])
     if sum([has_coeffs, has_roots, has_tf, has_params, has_chars]) != 1:
       raise Exception('Exactly one filter representation should be used')
 
@@ -257,7 +250,7 @@ class Filter:
     Attributes:
       input: input signal
       method: method used to calculate output signal. Must be one of (None, 'tf', 'ir', 'ode', 'fde').
-      fs: Sampling frequency of input (if input is not a Signal object)
+      fs: Sampling frequency (kHz) of input (if input is not a Signal object)
     '''
     if isinstance(input, Signal):
       if input.mode in ['t', 'f', 'w']:
@@ -266,7 +259,7 @@ class Filter:
         sig = input
     else:
       if fs is None:
-        raise Exception('Must provide fs')
+        raise Exception('Must provide fs (a common standard is 44.1)')
       sig = Signal(mode='ttilde', data=input, fs=fs/(2*np.pi*self.cf))
 
     if method is None:
@@ -463,7 +456,7 @@ class Filter:
     Generate plot of impulse reponse of Filter. Output is [x-axis (time) data, impulse response].
 
     Attributes:
-      times: Timestamps (s) where impulse response is evaluated. Defaults to `np.linspace(0, 100, 10000)`.
+      times: Timestamps (ms) where impulse response is evaluated. Defaults to `np.linspace(0, 100, 10000)`.
       custom_title: Optional title of plot. Default is 'Nyquist plot'.
       show: `True` if plot is to be shown, `False` otherwise. Default is `True`.
     '''
