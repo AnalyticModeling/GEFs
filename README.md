@@ -26,7 +26,7 @@ The toolset includes functionalities include filter construction and signal proc
 * The toolbox includes various solution methods for filtering using rational GEFs.
 
 ### GEFs: Potential Signal Processing Applications for GEFs
-* Potential applications may benefit from the direct specification over desired characteristics as well as the fine control over the characteristics enabled by the rational exponents primarily include those that make use of bandpass filterbanks and multiband filters. Such applications may include: parameteric equalizers, a front end for speech processing, microseismic signal XXX INSERT. 
+* Potential applications may benefit from the direct specification over desired characteristics as well as the fine control over the characteristics enabled by the rational exponents primarily include those that make use of bandpass filterbanks and multiband filters. Such applications may include: parameteric equalizers, a front end for speech processing, microseismic signal analysis. <!-- XXX INSERT.  -->
 
 ### GEFs: Filters Related to GEFs
 * Filters related to GEFs include the gammatone family of filters - e.g. Gammatone Filters (GTFs), All-Pole Gammatone Filters (APGFs), One-zero Gammatone Filters (OZGFs) [5]
@@ -76,5 +76,6 @@ Supervisor: Samiya Alkhairy
 [2] Alkhairy, S. A. (2024, February). Cochlear wave propagation and dynamics in the human base and apex: Model-based estimates from noninvasive measurements. In AIP Conference Proceedings (Vol. 3062, No. 1). AIP Publishing. [link](https://doi.org/10.1063/5.0189264).   
 [3] Alkhairy, S. A. (2024). Characteristics-Based Design of Multi-Exponent Bandpass Filters. arXiv preprint arXiv:2404.15321. [link](https://arxiv.org/abs/2404.15321v1).  
 [4] Alkhairy, S. A. (2024). Rational-Exponent Filters with Applications to Generalized Auditory Filterbanks. arXiv preprint arXiv:2406.16877. [link](https://arxiv.org/abs/2406.16877v2).  
+[5] Katsiamis, A. G., Drakakis, E. M., & Lyon, R. F. (2007). Practical gammatone-like filters for auditory processing. EURASIP Journal on Audio, Speech, and Music Processing, 2007, 1-15. [link](https://link.springer.com/article/10.1155/2007/63685).
 <!-- [5]   
 [6]    -->
