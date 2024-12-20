@@ -1,6 +1,8 @@
 import numpy as np
-import scipy as sp
 import scipy.fft
+import scipy.signal
+import scipy.integrate
+import scipy.io
 import matplotlib.pyplot as plt
 
 def tolerate(x, eps=1e-10):
@@ -48,7 +50,7 @@ class Signal:
     # having self.length as length of self.mode_t keeps a bit more info (literally)
     if self.mode in ['t', 'ttilde']:
       self.mode_t = data
-      self.mode_f = sp.fft.rfft(data)
+      self.mode_f = scipy.fft.rfft(data)
       self.length = len(data)
     else:
       if self.mode == 'w':
@@ -56,7 +58,7 @@ class Signal:
       else:
         self.mode_f = data
       self.length = 2*len(data)-1-int(evenlen) # -2 if evenlen is True and -1 if evenlen is False
-      self.mode_t = sp.fft.irfft(self.mode_f, self.length)
+      self.mode_t = scipy.fft.irfft(self.mode_f, self.length)
 
     self.func = (lambda t: self.at_time(t, tolerance=0)) # automatically in time domain, from_function for other domains
     self.timestamps = np.arange(self.length)/fs
@@ -67,7 +69,7 @@ class Signal:
     self.mean = np.mean(self.mode_t)
     self.rms = np.mean([x**2 for x in self.mode_t])**0.5
 
-    self.analytic = sp.signal.hilbert(self.mode_t)
+    self.analytic = scipy.signal.hilbert(self.mode_t)
     self.hilbert = np.real(self.analytic)
     self.inst_phase = np.unwrap(np.angle(self.analytic))
 
@@ -91,7 +93,7 @@ class Signal:
     if mode in ['t', 'ttilde']:
       sample_points = np.arange(num_samples)/fs
     else:
-      sample_points = sp.fft.rfftfreq(2*num_samples-1-int(evenlen), 1/fs)
+      sample_points = scipy.fft.rfftfreq(2*num_samples-1-int(evenlen), 1/fs)
     S = cls(mode=mode, data=func(sample_points), fs=fs, evenlen=evenlen)
     S.func = func
     return S
@@ -125,17 +127,17 @@ class Signal:
     return cls.from_function(mode='t', func=(lambda t: np.cos(np.pi*t*(fi*(2-t/endtime) + ff*(t/endtime)))), fs=fs, num_samples=num_samples, evenlen=(num_samples%2==0))
     # evenlen is actually never used in this case since the mode is always 't', but just for completeness
 
-  # @classmethod
-  # def from_instantaneous_frequency(cls, freq_func=(lambda x: 0), freqs=None, init_phase=0, fs=1, num_samples=9):
-  #   if freqs is None:
-  #     # gaussian quadrature?
-  #     ws = [2*np.pi*freq_func(i/fs) for i in range(num_samples)]
-  #   else:
-  #     ws = [2*np.pi*f for f in freqs]
+  @classmethod
+  def from_instantaneous_frequency(cls, freq_func=(lambda x: 0), freqs=None, init_phase=0, fs=1, num_samples=9):
+    if freqs is None:
+      # gaussian quadrature?
+      ws = [2*np.pi*freq_func(i/fs) for i in range(num_samples)]
+    else:
+      ws = [2*np.pi*f for f in freqs]
 
-  #   phases = sp.integrate.cumulative_trapezoid(ws, dx=1/fs, initial=0)+init_phase
+    phases = scipy.integrate.cumulative_trapezoid(ws, dx=1/fs, initial=0)+init_phase
 
-  #   return cls(mode='t', data=np.cos(phases).tolist(), fs=fs)
+    return cls(mode='t', data=np.cos(phases).tolist(), fs=fs)
 
   def __iter__(self):
     self.__idx = -1
@@ -253,13 +255,15 @@ class Signal:
     if tolerate(num, eps=tolerance):
       return self.mode_t[round(num)%self.length]
 
-    f = [k/self.length for k in self.mode_f]
+    f = self.mode_f
+    freqstamps = self.freqstamps
 
-    tot = f[0].real
+    tot = np.real(f[0])
     for idx in range(1, len(f)):
-      tot += 2 * (f[idx] * np.exp(2j*np.pi*idx*t/self.length)).real
+      tot += 2 * np.real(f[idx] * np.exp(2j*np.pi*t*freqstamps[idx]))
     if self.length%2 == 0:
-      tot -= (f[idx] * np.exp(2j*np.pi*idx*t/self.length)).real
+      tot -= np.real(f[idx] * np.exp(2j*np.pi*t*freqstamps[idx]))
+    tot /= self.length
     if tolerate(tot, eps=tolerance):
       tot = round(tot)
     return tot
@@ -358,12 +362,12 @@ class Signal:
     Hs = []
     for i in range(self.length-window_len+1):
       data = self.mode_t[i:i+9]
-      spectrum = abs(sp.fft.fft(data))**2
+      spectrum = abs(scipy.fft.fft(data))**2
       distribution = spectrum/sum(spectrum)
       Hs += [-sum(p*np.log(p) for p in distribution)/np.log(window_len)]
     return Hs
 
-  def spectrogram(self, win=sp.signal.windows.gaussian(30, std=5, sym=True), hop=1, mfft=200, custom_title='Spectrogram', show=True):
+  def spectrogram(self, win=scipy.signal.windows.gaussian(30, std=5, sym=True), hop=1, mfft=200, custom_title='Spectrogram', show=True):
     '''
     Generates spectrogram of Signal. Returns [SFFT data, bounds]. \
       Since the window has a small width, the resulting SFFT is \
@@ -377,7 +381,7 @@ class Signal:
       show: `True` if plot is to be shown, `False` otherwise. Default is `True`.
     '''
     N = self.length
-    ft = sp.signal.ShortTimeFFT(np.array(win), hop, self.fs, mfft=mfft)
+    ft = scipy.signal.ShortTimeFFT(np.array(win), hop, self.fs, mfft=mfft)
     S = ft.spectrogram(np.array(self.mode_t))
     windowed_S = S[:, ft.lower_border_end[1]:ft.upper_border_begin(N)[1]]
     bounds = (0, ft.delta_t*len(windowed_S[0]), *ft.extent(N)[2:])
@@ -471,4 +475,4 @@ class Signal:
     Attributes:
       filename: Filename to save sound file under.
     '''
-    sp.io.wavfile.write(filename, self.fs, np.array(self.mode_t))
+    scipy.io.wavfile.write(filename, self.fs, np.array(self.mode_t))

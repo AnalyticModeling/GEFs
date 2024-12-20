@@ -67,7 +67,7 @@ class Filter:
     has_roots = (roots is not None)
     has_params = any(param is not None for param in [Ap, bp, Bu])
     has_chars = any(characteristic is not None for characteristic in [Bpeak, fpeak, phiaccum, Nbeta, Nf, Qerb, ERBbeta, ERBf, Qn, Qn2, BWndBbeta, BWndBf, BWn2dBbeta, BWn2dBf, Sbeta, Sf])
-    if sum([has_coeffs, has_roots, has_tf, has_params, has_chars]) != 1:
+    if sum([has_coeffs, has_roots, has_tf, has_ir, has_params, has_chars]) != 1:
       raise Exception('Exactly one filter representation should be used')
 
     self.in_terms_of_normalized = True
@@ -86,7 +86,13 @@ class Filter:
     if Sf is not None: Sbeta = Sf * self.cf**2
     if Nf is not None: Nbeta = Nf * self.cf
 
-    if betas is None: betas = np.geomspace(0.01, 10, 10000) # is there a more adaptive way to pick betas if it is not provided
+    if betas is None:
+      maxbeta = 10
+      if bp is not None:
+        maxbeta = 3*bp
+      if Bpeak is not None:
+        maxbeta = 3*Bpeak
+      betas = np.linspace(0.01, maxbeta, 10000)
 
     # eventually refactor by making the __init__ of the three classes deal with the logic (which it actually already mostly does)
     if has_tf:
@@ -510,7 +516,7 @@ class Filter:
       ax.axhline(y=0, color='k', ls=':')
       ax.axvline(x=0, color='k', ls=':')
       ax.scatter([z.real for z in zeros], [z.imag for z in zeros], marker='o', facecolors='none', edgecolors='tab:orange')
-      ax.scatter([z.real for z in poles], [z.imag for z in poles], marker='x', edgecolors='tab:blue')
+      ax.scatter([z.real for z in poles], [z.imag for z in poles], marker='x', facecolors='tab:blue')
       ax.set_xlabel('Re(z)')
       ax.set_ylabel('Im(z)')
       plt.axis('equal')

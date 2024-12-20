@@ -78,7 +78,19 @@ class Arbitrary(AbstractFilter):
     if betas is None:
       betas = np.geomspace(0.01, 10, 10000)
     self.init_with_tf = (tf is not None)
-    chars = helpers.computedfiltercharacteristics(tfunc=tf, betas=betas)
+    if self.init_with_tf:
+      chars = helpers.computedfiltercharacteristics(tfunc=tf, betas=betas)
+    else:
+      # much faster than using approx_tf, even if it's not as accurate
+      siglen = len(betas)*2
+      samprate = betas[-1]*2
+      timestamps = np.arange(siglen)/samprate
+      irarr = [ir(t) for t in timestamps]
+      tfapprox = scipy.fft.rfft(irarr)
+      origbetas = scipy.fft.rfftfreq(siglen, d=1/samprate)
+      chars = helpers.computedfiltercharacteristics(tfunc=(lambda f: np.interp(f, origbetas, tfapprox)), betas=betas)
+
+      # np.interp
 
     if tf is not None:
       if ir is not None:
