@@ -26,7 +26,7 @@ The toolset includes functionalities include filter construction and signal proc
 * The toolbox includes various solution methods for filtering using rational GEFs.
 
 ### GEFs: Potential Signal Processing Applications for GEFs
-* Potential applications may benefit from the direct specification over desired characteristics as well as the fine control over the characteristics enabled by the rational exponents primarily include those that make use of bandpass filterbanks and multiband filters. Such applications may include: parameteric equalizers, a front end for speech processing, microseismic signal analysis. <!-- XXX INSERT.  -->
+* Potential applications may benefit from the direct specification over desired characteristics as well as the fine control over the characteristics enabled by the rational exponents primarily include those that make use of bandpass filterbanks and multiband filters. Such applications may include: parameteric equalizers, a front end for speech processing, microseismic signal analysis, and signal classification. <!-- XXX INSERT.  -->
 
 ### GEFs: Filters Related to GEFs
 * Filters related to GEFs include the gammatone family of filters - e.g. Gammatone Filters (GTFs), All-Pole Gammatone Filters (APGFs), One-zero Gammatone Filters (OZGFs) [5]
