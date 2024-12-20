@@ -1,6 +1,5 @@
 # GEFs
-The toolbox has been primarily developed for filter design and signal processing and analysis purposes as well as for the scientific study of the auditory system pertaining to the cochlea and perceptual studies. The toolbox has been developed such that users with interests and backgrounds in only one of the aforementioned fields may use it without concerning themselves with other functionalities. 
-
+The toolbox has been primarily developed for filter design and signal processing and analysis purposes as well as for the scientific study of the auditory system pertaining to the cochlea and perceptual studies. The toolbox has been developed such that users with interests and backgrounds in only one of the aforementioned fields may use it without concerning themselves with other functionalities.
 
 ## Capabilities for Filter Design and Filtering
 The toolset includes functionalities include filter construction and signal processing using filters for arbitrary filters and signals. It also includes filter design functionalities specific to a class of bandpass filters (referred to as GEFs) and related classes of bandpass filters, multiband filters, and filterbanks. GEFs are bandpass LTI filters with a pair of poles repeated $B_u$ times.
@@ -22,11 +21,9 @@ The toolset includes functionalities include filter construction and signal proc
 * The characteristics-based design methods extends beyond GEFs to related bandpass filters (see [3]) as well as to filterbanks and bandpass filters and may be used for adaptive filtering based on variable filter design.
 * The accuracy in achieving the desired specifications on filter characteristics is assessed.
 
-
 ### GEFs: Designing and Filtering with Rational Exponent Filters (Rational GEFs)
 * In order to access a continuum of filter characteristics, GEFs may have rational exponents rather than being constraint to discrete filter behavior.
 * The toolbox includes various solution methods for filtering using rational GEFs.
-
 
 ### GEFs: Potential Signal Processing Applications for GEFs
 * Potential applications may benefit from the direct specification over desired characteristics as well as the fine control over the characteristics enabled by the rational exponents primarily include those that make use of bandpass filterbanks and multiband filters. Such applications may include: parameteric equalizers, a front end for speech processing, microseismic signal XXX INSERT. 
@@ -50,7 +47,7 @@ The toolset includes functionalities include filter construction and signal proc
 
 
 ## Tutorials and Documentation
-* Documentation for the toolbox is in `documentation.pdf`. Example plots in the documentation are generated in python using `tutorial.py`. These illustrate a comprehensive set of the toolbox's capabilities.
+* Documentation for the toolbox is in `documentation.pdf`. Example plots in the documentation are generated in python using `demo_alkhairy2019.py`. These illustrate a comprehensive set of the toolbox's capabilities.
 * `alkhairy2019.m` generates some of the figures in [1] and [2] are are of the greatest interest to those in auditory physics and modeling cochlear mechanisms.
 * `alkhairy2024.m` generates some of the figures in [3] and [4] and are of the greatest interest to those in signal processing and filter design.  
 
@@ -61,19 +58,23 @@ The toolbox may be used in Python or MATLAB. In either case, you will need to in
 To install the requirements, run the following in Python 3,
 
 ```
-$ pip -r install requirements.txt
+$ pip install -r requirements.txt
 ```
 
 This can be done globally or using a virtual environment - e.g. [see here](https://dev.to/emminex/how-to-install-python-libraries-in-visual-studio-code-38i1).
 
 ## Contributing
-Before submitting a pull request, please run the tutorial files `tutorial.py`, `alkhairy2019.m`, and `alkhairy2024.m` to make sure that the changes do not break the code. Future releases may include dedicated unit tests.
+<!-- Before submitting a pull request, please run the tutorial files `tutorial.py`, `alkhairy2019.m`, and `alkhairy2024.m` to make sure that the changes do not break the code. Future releases may include dedicated unit tests. -->
+Before submitting a pull request, please run the tutorial files `demo_alkhairy2019.py` and `demo_alkhairy2019.py` to make sure that the changes do not break the code. Future releases may include dedicated unit tests.
 
+## Contributors
+Wayne Zhao
+Supervisor: Samiya Alkhairy
 
 ## References
 [1] Alkhairy, S. A., & Shera, C. A. (2019). An analytic physically motivated model of the mammalian cochlea. The Journal of the Acoustical Society of America, 145(1), 45-60. [link](https://doi.org/10.1121/1.5084042).  
 [2] Alkhairy, S. A. (2024, February). Cochlear wave propagation and dynamics in the human base and apex: Model-based estimates from noninvasive measurements. In AIP Conference Proceedings (Vol. 3062, No. 1). AIP Publishing. [link](https://doi.org/10.1063/5.0189264).   
 [3] Alkhairy, S. A. (2024). Characteristics-Based Design of Multi-Exponent Bandpass Filters. arXiv preprint arXiv:2404.15321. [link](https://arxiv.org/abs/2404.15321v1).  
 [4] Alkhairy, S. A. (2024). Rational-Exponent Filters with Applications to Generalized Auditory Filterbanks. arXiv preprint arXiv:2406.16877. [link](https://arxiv.org/abs/2406.16877v2).  
-[5]   
-[6]   
+<!-- [5]   
+[6]    -->
