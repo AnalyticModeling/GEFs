@@ -199,14 +199,11 @@ classdef Filter
         function [timestamps, response] = impulse_response_plot(obj, options)
             arguments
                 obj
-                options.num_samples = int32(10000)
-                options.sample_freq = 500
+                options.times = string(missing)
                 options.custom_title = 'Impulse response'
                 options.show = true
             end
-            all_output = obj.PyFilter.impulse_response_plot(num_samples=int32(options.num_samples), ...
-                    sample_freq=options.sample_freq, ...
-                    show=false);
+            all_output = obj.PyFilter.impulse_response_plot(times=options.times, show=false);
             timestamps = double(all_output{1});
             response = double(all_output{2});
             if options.show

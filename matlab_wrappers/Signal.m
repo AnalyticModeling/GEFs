@@ -111,21 +111,32 @@ classdef Signal
             lower = double(all_output{2});
         end
         function instphi = instantaneous_phase(obj)
-            instphi = double(obj.instantaneous_phase());
+            instphi = double(obj.PySignal.instantaneous_phase());
         end
         function instf = instantaneous_freq(obj)
-            instf = double(obj.instantaneous_freq());
+            instf = double(obj.PySignal.instantaneous_freq());
         end
         function specH = spectral_entropy(obj)
-            specH = double(obj.spectral_entropy());
+            specH = double(obj.PySignal.spectral_entropy());
         end
         function moveH = moving_spectral_entropy(obj, window_len)
             if nargin == 1
                 window_len = 9;
             end
-            moveH = double(obj.moving_spectral_entropy(window_len=window_len));
+            moveH = double(obj.PySignal.moving_spectral_entropy(window_len=window_len));
         end
-        function [sfft, bounds] = spectrogram(obj)
+        function [sfft, bounds] = spectrogram(obj, options)
+            arguments
+                obj
+                options.win = string(missing)
+                options.hop = int32(1)
+                options.mfft = int32(200)
+                options.custom_title = 'Spectrogram'
+                options.show = true
+            end
+            output = obj.PySignal.spectrogram(win=options.win, hop=int32(options.hop), mfft=int32(options.mfft), ...
+                custom_title=options.custom_title, show=options.show);
+            output
             sfft = 0;
             bounds = 0;
         end

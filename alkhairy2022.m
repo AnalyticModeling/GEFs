@@ -53,4 +53,4 @@ function fig2_2022
     xline(1, ':k')
 end
 
-% fig2_2022
+fig2_2022

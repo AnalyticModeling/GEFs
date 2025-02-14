@@ -70,7 +70,7 @@ class Signal:
     self.rms = np.mean([x**2 for x in self.mode_t])**0.5
 
     self.analytic = scipy.signal.hilbert(self.mode_t)
-    self.hilbert = np.real(self.analytic)
+    self.hilbert = np.array([x.real for x in self.analytic])
     self.inst_phase = np.unwrap(np.angle(self.analytic))
 
   @classmethod
@@ -367,7 +367,7 @@ class Signal:
       Hs += [-sum(p*np.log(p) for p in distribution)/np.log(window_len)]
     return Hs
 
-  def spectrogram(self, win=scipy.signal.windows.gaussian(30, std=5, sym=True), hop=1, mfft=200, custom_title='Spectrogram', show=True):
+  def spectrogram(self, win=None, hop=1, mfft=200, custom_title='Spectrogram', show=True):
     '''
     Generates spectrogram of Signal. Returns [SFFT data, bounds]. \
       Since the window has a small width, the resulting SFFT is \
@@ -380,6 +380,7 @@ class Signal:
       custom_title: Optional title of plot. Default is 'Spectrogram'.
       show: `True` if plot is to be shown, `False` otherwise. Default is `True`.
     '''
+    if win is None: win = scipy.signal.windows.gaussian(30, std=5, sym=True)
     N = self.length
     ft = scipy.signal.ShortTimeFFT(np.array(win), hop, self.fs, mfft=mfft)
     S = ft.spectrogram(np.array(self.mode_t))

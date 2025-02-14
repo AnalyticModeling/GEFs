@@ -68,6 +68,8 @@ function fig8_2019
     c.signal_response_heatmap(sig, len_xs=20)
 end
 
-% fig3_2019
-% fig6_2019
-% fig8_2019
+fig3_2019
+figure
+fig6_2019
+figure
+fig8_2019

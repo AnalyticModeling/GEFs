@@ -56,7 +56,7 @@ class Cochlea(FilterBank):
         cfs = [self.cf(x) for x in xs]
       else:
         if xs is not None:
-          raise Exception('Please provide either only a list of all locations along cochlea or a list of all characteristic frequencies')
+          raise Exception('Please provide exactly one of either a list of all locations along cochlea (xs) or a list of all characteristic frequencies (cfs)')
         xs = [-np.log(cf/CF0)*l_factor for cf in cfs]
 
       self.xs = xs
@@ -72,9 +72,15 @@ class Cochlea(FilterBank):
     self.bp_apex = bp_apex
     Bu_apex = apexmost_filter.get_params()['Bu']
 
-    self.Ap_fun = (lambda x: np.exp(np.interp(x, self.xs, np.log(np.array(Ap)))))
-    self.bp_fun = (lambda x: np.exp(np.interp(x, self.xs, np.log(np.array(bp)))))
-    self.Bu_fun = (lambda x: np.exp(np.interp(x, self.xs, np.log(np.array(Bu)))))
+    allparams = [[], [], []]
+    for fil in self.filters:
+      params = fil.get_params()
+      allparams[0] += [params['Ap']]
+      allparams[1] += [params['bp']]
+      allparams[2] += [params['Bu']]
+    self.Ap_fun = (lambda x: np.exp(np.interp(x, self.xs, np.log(np.array(allparams[0])))))
+    self.bp_fun = (lambda x: np.exp(np.interp(x, self.xs, np.log(np.array(allparams[1])))))
+    self.Bu_fun = (lambda x: np.exp(np.interp(x, self.xs, np.log(np.array(allparams[2])))))
 
     p = 1j*bp_apex - Ap_apex
     # k and Z both normalized to not depend on l
@@ -86,16 +92,22 @@ class Cochlea(FilterBank):
     self.Z = self.impedance
 
   @classmethod
-  def five_param(cls, type=None, aAp=None, bAp=None, bp=None, aBu=None, bBu=None, gain_const=None, peak_magndb=None, CF0=20, l_factor=3.8, length=20, xs=None, rho=1.000, betas=None, freqs=None):
+  def five_param(cls, type=None, aAp=None, bAp=None, bp=None, aBu=None, bBu=None, gain_const=None, peak_magndb=None, CF0=20, l_factor=3.8, length=20, xs=None, cfs=None, rho=1.000, betas=None, freqs=None):
     '''
     Five parameter parameterization of Cochlea from (Alkhairy 2019)
     '''
-    if xs is None:
-      xs = np.linspace(0, length, 4)
     cf = (lambda x: CF0*np.exp(-x/l_factor))
     Ap_func = (lambda x: aAp*np.exp(bAp*cf(x)))
     Bu_func = (lambda x: aBu*np.exp(bBu*cf(x)))
-    cochlea = cls(type=type, Ap=[Ap_func(x) for x in xs], bp=bp, Bu=[Bu_func(x) for x in xs], gain_const=gain_const, peak_magndb=peak_magndb, CF0=CF0, length=length, xs=xs, rho=rho, species=None, betas=betas, freqs=freqs)
+    if cfs is not None:
+      if xs is not None:
+        raise Exception('Please provide exactly one of either a list of all locations along cochlea (xs) or a list of all characteristic frequencies (cfs)')
+      xs = [-np.log(cf/CF0)*l_factor for cf in cfs]
+      cochlea = cls(type=type, Ap=[Ap_func(x) for x in xs], bp=bp, Bu=[Bu_func(x) for x in xs], gain_const=gain_const, peak_magndb=peak_magndb, CF0=CF0, l_factor=l_factor, length=length, cfs=cfs, rho=rho, species=None, betas=betas, freqs=freqs)
+    else:
+      if xs is None:
+        xs = np.linspace(0, length, 4)
+      cochlea = cls(type=type, Ap=[Ap_func(x) for x in xs], bp=bp, Bu=[Bu_func(x) for x in xs], gain_const=gain_const, peak_magndb=peak_magndb, CF0=CF0, l_factor=l_factor, length=length, xs=xs, rho=rho, species=None, betas=betas, freqs=freqs)
     cochlea.Ap_fun = Ap_func
     cochlea.Bu_fun = Bu_func
     return cochlea
@@ -161,9 +173,11 @@ class Cochlea(FilterBank):
       custom_title = 'Wavenumber (k)'
     if betas is None:
       betas = np.linspace(0.01, self.bp_apex*1.5, 10000)
+    else:
+      betas = np.array(betas)
     kdata = self.k(betas)
-    reals = np.real(kdata)
-    imags = np.imag(kdata)
+    reals = np.array([x.real for x in kdata])
+    imags = np.array([x.imag for x in kdata])
     magns = abs(kdata)
     if phase_in_rad:
       phases = np.unwrap(np.angle(kdata))
@@ -203,9 +217,11 @@ class Cochlea(FilterBank):
     # plot Z and normalized Z?
     if betas is None:
       betas = np.linspace(0.01, self.bp_apex*1.5, 10000)
+    else:
+      betas = np.array(betas) # seems like this line is unnecessary?
     Zdata = self.Z_norm(betas)
-    reals = np.real(Zdata)
-    imags = np.imag(Zdata)
+    reals = np.array([x.real for x in Zdata])
+    imags = np.array([x.imag for x in Zdata])
     magns = abs(Zdata)
     if phase_in_rad:
       phases = np.unwrap(np.angle(Zdata))
@@ -230,11 +246,13 @@ class Cochlea(FilterBank):
         helpers.plot_with_arrow(reals, imags, xlabel='Re(Z_norm) (Ω/???)', ylabel='Im(Z_norm) (Ω/???)', custom_title=custom_title)
     return [betas, reals, imags, magns, phases]
 
-  def signal_response_heatmap(self, signal, len_xs=20, custom_title='Signal Heatmap', show=True):
+  def signal_response_heatmap(self, signal, len_xs=20, custom_title='Envelope of Signal Response at Various Characteristic Frequencies', show=True):
     '''
     Heatmap of Cochlear response to Signal. Successively more apical parts \
       of the Cochlea are checked to see their response to the same Signal, \
       which neatly shows which parts of the Cochlea are most response to what parts of the Signal
+
+    NOTE: errors if Cochlea has something of length 1?
 
     Arguments:
       signal: Signal that Cochlea is processing
@@ -253,11 +271,11 @@ class Cochlea(FilterBank):
 
     if show:
       fig, ax = plt.subplots()
-      img = ax.imshow(sigs, cmap='viridis', aspect='auto')
+      img = ax.imshow(sigs, cmap='viridis', aspect='auto', extent=[signal.timestamps[0], signal.timestamps[-1], cfs[-1], cfs[0]])
       fig.suptitle(custom_title)
       fig.colorbar(img)
-      ax.set_xlabel('Time (s)')
-      ax.set_ylabel('Frequency (1/s)')
-      plt.yticks(range(len(cfs)), cfs)
+      ax.set_xlabel('Time (ms)')
+      ax.set_ylabel('Characteristic Frequency (kHz)')
+      # plt.yticks(range(len(cfs)), cfs)
       plt.show()
     return sigs

@@ -302,7 +302,7 @@ class Filter:
   def __call__(self, input, method='default', fs=1):
     return self.solve(input, method=method, fs=fs)
 
-  def bode_plot(self, freqs=None, peak_magndb=0, custom_title='Bode plot', show=True):
+  def bode_plot(self, freqs=None, custom_title='Bode plot', show=True):
     '''
     Generate Bode plot of filter. Returns [x-axis (frequency) data, magnitudes (dB), phases (cycles)].
 
@@ -312,7 +312,6 @@ class Filter:
 
     Attributes:
       freqs: Frequencies (kHz) where transfer function is sampled (after multiplication by 1j)
-      peak_magndb: Peak magnitude that should be displayed on Bode plot (defaults to 0)
       custom_title: Optional title of plot. Default is 'Bode plot'.
       show: `True` if plot is to be shown, `False` otherwise. Default is `True`.
     '''
@@ -323,8 +322,6 @@ class Filter:
 
     response = self.filter.tf(1j*xaxis)
     magns = helpers.mag2db(abs(response))
-    if peak_magndb is not None:
-      magns += peak_magndb-max(magns)
     phases = np.unwrap(np.angle(response)) / (2 * np.pi)
 
     if show:

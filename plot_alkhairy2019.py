@@ -17,7 +17,7 @@ def fig3_2019():
   ax1.xaxis.set_major_locator(locator=matplotlib.ticker.LogLocator(subs=(0.7, 1, 1.2)))
   ax1.xaxis.set_minor_locator(matplotlib.ticker.NullLocator())
   ax1.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
-  ax1.set_ylabel(r'Re{k} (mm⁻¹)')
+  ax1.set_ylabel(r'Re{k} (mm$^{-1}$)')
   ax1.axhline(y=0, color='k', ls=':')
   ax1.axvline(x=1, color='k', ls=':')
 
@@ -25,46 +25,48 @@ def fig3_2019():
   ax2.xaxis.set_major_locator(locator=matplotlib.ticker.LogLocator(subs=(0.7, 1, 1.2)))
   ax2.xaxis.set_minor_locator(matplotlib.ticker.NullLocator())
   ax2.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
-  ax2.set_ylabel(r'Im{k} (mm⁻¹)')
+  ax2.set_ylabel(r'Im{k} (mm$^{-1}$)')
   ax2.axhline(y=0, color='k', ls=':')
   ax2.axvline(x=1, color='k', ls=':')
   ax2.set_xlabel('β')
+
+  fig.suptitle('Wavenumber (k) of model')
   plt.show()
 
 def fig6_2019():
   c = Cochlea.five_param(type='V', aAp=0.3768, bAp=-0.1366, bp=[0.2, 0.5, 2, 5, 15], aBu=3.714, bBu=0.03123, xs=[i for i in range(5)])
-  fils = c.bode_plot(freqs=np.geomspace(0.1, 20, 100000))
+  # fils = c.bode_plot(freqs=np.geomspace(0.1, 20, 100000))
   # plt.plot(betas, phases_cyc)
   # plt.plot(betas, -np.gradient(phases_cyc, betas))
   # plt.show()
 
-  # fils = c.bode_plot(freqs=np.geomspace(0.1, 30, 100000), show=False)
+  fils = c.bode_plot(freqs=np.geomspace(0.1, 30, 100000), show=False)
 
-  # fig, (ax1, ax2) = plt.subplots(2, 1)
-  # fig.suptitle('Q and N of velocities of a cochlea')
+  fig, (ax1, ax2) = plt.subplots(2, 1)
+  fig.suptitle('Q and N of velocities of a cochlea')
 
-  # for i in range(5):
-  #   fil = fils[i]
-  #   chars = c.filters[i].get_computed_chars()
-  #   print(chars)
-  #   xaxis, magn, phase, uid = fil
-  #   ax1.semilogx(xaxis, magn, label=f'Q={round(chars["Qerb"], 2)}') # magn in db
-  #   # ax2.semilogx(xaxis, phase, label=f'N={round(chars["Nbeta"], 2)}') # phase in cycles
-  #   ax2.plot(xaxis, phase, label=f'N={round(chars["Nbeta"], 2)}') # phase in cycles
-  # ax1.xaxis.set_major_locator(locator=matplotlib.ticker.LogLocator(subs=(1, 2, 5)))
-  # ax1.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
-  # ax1.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
-  # ax1.set_ylabel('Magnitude (dB)')
-  # ax1.legend()
+  for i in range(5):
+    fil = fils[i]
+    chars = c.filters[i].get_computed_chars()
+    # print(chars)
+    xaxis, magn, phase, uid = fil
+    ax1.semilogx(xaxis, magn, label=f'Q={round(chars["Qerb"], 2)}') # magn in db
+    # ax2.semilogx(xaxis, phase, label=f'N={round(chars["Nbeta"], 2)}') # phase in cycles
+    ax2.plot(xaxis, phase, label=f'N={round(chars["Nbeta"], 2)}') # phase in cycles
+  ax1.xaxis.set_major_locator(locator=matplotlib.ticker.LogLocator(subs=(1, 2, 5)))
+  ax1.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
+  ax1.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
+  ax1.set_ylabel('Magnitude (dB)')
+  ax1.legend()
 
-  # # ax2.xaxis.set_major_locator(locator=matplotlib.ticker.LogLocator(subs=(1, 2, 5)))
-  # # ax2.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
-  # # ax2.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
-  # ax2.set_ylabel('Phase (radians)')
-  # ax2.set_xlabel('Normalized frequency')
-  # ax2.legend()
+  # ax2.xaxis.set_major_locator(locator=matplotlib.ticker.LogLocator(subs=(1, 2, 5)))
+  # ax2.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
+  # ax2.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
+  ax2.set_ylabel('Phase (cycles)')
+  ax2.set_xlabel('Normalized frequency')
+  ax2.legend()
 
-  # plt.show()
+  plt.show()
 
 def fig8_2019():
   c = Cochlea.five_param(type='V', aAp=0.3768, bAp=-0.1366, bp=[1, 1, 1, 1, 1], aBu=3.714, bBu=0.03123, xs=[i for i in range(5)])
@@ -76,7 +78,7 @@ def fig8_2019():
       ans += np.exp(-((t-ti)/50)**2) * np.sin(2*np.pi*fi*t)
     return ans
   sig = Signal(mode='t', data=[tones(t/100) for t in range(100000)], fs=100)
-  c.signal_response_heatmap(sig)
+  c.signal_response_heatmap(sig, len_xs=20)
 
 def fig2_2022():
   fig, axs = plt.subplots(2, 2, constrained_layout=True)
@@ -85,21 +87,22 @@ def fig2_2022():
   betas1, reals1, imags1, magns1, phases1 = c1.plot_wavenumber(betas=np.geomspace(0.5, 2, 10000), show=False)
   c2 = Cochlea(Ap=[0.055], bp=[1], Bu=[7], CF0=10)
   betas2, reals2, imags2, magns2, phases2 = c2.plot_wavenumber(betas=np.geomspace(0.5, 2, 10000), show=False)
-  axs[0][0].semilogx(betas1, reals1)
-  axs[0][0].semilogx(betas2, reals2, ls='--')
+  axs[0][0].semilogx(betas1, reals1, label='Human Apex')
+  axs[0][0].semilogx(betas2, reals2, ls='--', label='Human Base')
   axs[0][0].xaxis.set_major_locator(locator=matplotlib.ticker.LogLocator(subs=(0.5, 1, 2)))
   axs[0][0].xaxis.set_minor_locator(matplotlib.ticker.NullLocator())
   axs[0][0].xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
-  axs[0][0].set_ylabel(r'Re{k} (mm⁻¹)')
+  axs[0][0].set_ylabel(r'Re{k} (mm$^{-1}$)')
   axs[0][0].axhline(y=0, color='k', ls=':')
   axs[0][0].axvline(x=1, color='k', ls=':')
+  axs[0][0].legend()
 
   axs[0][1].semilogx(betas1, imags1)
   axs[0][1].semilogx(betas2, imags2, ls='--')
   axs[0][1].xaxis.set_major_locator(locator=matplotlib.ticker.LogLocator(subs=(0.5, 1, 2)))
   axs[0][1].xaxis.set_minor_locator(matplotlib.ticker.NullLocator())
   axs[0][1].xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
-  axs[0][1].set_ylabel(r'Im{k} (mm⁻¹)')
+  axs[0][1].set_ylabel(r'Im{k} (mm$^{-1}$)')
   axs[0][1].axhline(y=0, color='k', ls=':')
   axs[0][1].axvline(x=1, color='k', ls=':')
 
@@ -112,20 +115,22 @@ def fig2_2022():
   axs[1][0].xaxis.set_major_locator(locator=matplotlib.ticker.LogLocator(subs=(0.5, 1, 2)))
   axs[1][0].xaxis.set_minor_locator(matplotlib.ticker.NullLocator())
   axs[1][0].xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
-  axs[1][0].set_ylabel(r'Re{Z}/(2πρl)')
+  axs[1][0].set_ylabel(r'Re{Z}/(2$\pi\rho$l)')
   axs[1][0].axhline(y=0, color='k', ls=':')
   axs[1][0].axvline(x=1, color='k', ls=':')
-  axs[1][1].set_xlabel('β')
+  axs[1][0].set_xlabel(r'$\beta$')
 
   axs[1][1].semilogx(betas1, imags1)
   axs[1][1].semilogx(betas2, imags2, ls='--')
   axs[1][1].xaxis.set_major_locator(locator=matplotlib.ticker.LogLocator(subs=(0.5, 1, 2)))
   axs[1][1].xaxis.set_minor_locator(matplotlib.ticker.NullLocator())
   axs[1][1].xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
-  axs[1][1].set_ylabel(r'Im{Z}/(2πρl)')
+  axs[1][1].set_ylabel(r'Im{Z}/(2$\pi\rho$l)')
   axs[1][1].axhline(y=0, color='k', ls=':')
   axs[1][1].axvline(x=1, color='k', ls=':')
-  axs[1][1].set_xlabel('β')
+  axs[1][1].set_xlabel(r'$\beta$')
+
+  fig.suptitle('Estimated wavenumbers and impedances in human cochlea')
   plt.show()
 
 def fig1_2024():
@@ -145,16 +150,17 @@ def fig1_2024():
   fig, axs = plt.subplots(2, 2, constrained_layout=True)
   Pdb = helpers.mag2db(abs(responses[0]))
   Psharpdb = helpers.mag2db(abs(responses[1]))
-  axs[0][0].semilogx(freqs, Pdb-max(Pdb))
-  axs[0][0].semilogx(freqs, Psharpdb-max(Psharpdb), ls='--')
+  axs[0][0].semilogx(freqs, Pdb-max(Pdb), label='Modeled k')
+  axs[0][0].semilogx(freqs, Psharpdb-max(Psharpdb), ls='--', label='Sharp approx.')
   axs[0][0].set_title(r'mag{P} (dB)')
+  axs[0][0].legend()
 
   Pcyc = np.unwrap(np.angle(responses[0])) / (2 * np.pi)
   Psharpcyc = np.unwrap(np.angle(responses[1])) / (2 * np.pi)
   axs[1][0].semilogx(freqs, Pcyc-Pcyc[0])
   axs[1][0].semilogx(freqs, Psharpcyc-Psharpcyc[0], ls='--')
   axs[1][0].set_title(r'phase{P} (cyc)')
-  axs[1][0].set_xlabel('β')
+  axs[1][0].set_xlabel(r'$\beta$')
 
   kre = [z.real for z in responses[2]]
   ksharpre = [z.real for z in responses[3]]
@@ -167,14 +173,14 @@ def fig1_2024():
   axs[1][1].semilogx(freqs, kim)
   axs[1][1].semilogx(freqs, ksharpim, ls='--')
   axs[1][1].set_title(r'Im{kᵦ}')
-  axs[1][1].set_xlabel('β')
+  axs[1][1].set_xlabel(r'$\beta$')
+
+  fig.suptitle('Validity of sharp-filter approximation ($A_p$=0.055, $B_u$=7)')
   plt.show()
 
 def fig3_2024():
   filP = Filter(Bpeak=1, Nbeta=19.1, Qerb=25.9)
   filV = Filter(type='V', Bpeak=1, Nbeta=19.1, Qerb=25.9)
-  print(filP.get_computed_chars())
-  filP.characteristic_error()
 
   P = filP.filter.tf
   Psharp = filP.filter.sharp_approximation()[0]
@@ -187,11 +193,12 @@ def fig3_2024():
   Pdb = helpers.mag2db(abs(responses[0]))
   Psharpdb = helpers.mag2db(abs(responses[1]))
   Vdb = helpers.mag2db(abs(responses[2]))
-  axs[0].semilogx(freqs, Pdb-max(Pdb))
-  axs[0].semilogx(freqs, Psharpdb-max(Psharpdb), ls='--')
-  axs[0].semilogx(freqs, Vdb-max(Vdb), ls=':')
-  axs[0].set_ylabel(r'magnitude (dB)')
-  axs[0].set_xlabel('β')
+  axs[0].semilogx(freqs, Pdb-max(Pdb), label='P')
+  axs[0].semilogx(freqs, Psharpdb-max(Psharpdb), ls='--', label=r'$P_{sharp}$')
+  axs[0].semilogx(freqs, Vdb-max(Vdb), ls=':', label='V')
+  axs[0].set_ylabel(r'Magnitude (dB)')
+  axs[0].set_xlabel(r'$\beta$')
+  axs[0].legend()
 
   Pcyc = np.unwrap(np.angle(responses[0])) / (2 * np.pi)
   Psharpcyc = np.unwrap(np.angle(responses[1])) / (2 * np.pi)
@@ -199,8 +206,10 @@ def fig3_2024():
   axs[1].semilogx(freqs, Pcyc-Pcyc[0])
   axs[1].semilogx(freqs, Psharpcyc-Psharpcyc[0], ls='--')
   axs[1].semilogx(freqs, Vcyc-Vcyc[0], ls=':')
-  axs[1].set_ylabel(r'phase (cyc)')
-  axs[1].set_xlabel('β')
+  axs[1].set_ylabel(r'Phase (cyc)')
+  axs[1].set_xlabel(r'$\beta$')
+
+  fig.suptitle('Comparison of P, V, sharp-filter approximation of P ($b_p$=1, $A_p$=0.1, $B_u$=7)')
   plt.show()
 
 def fig5_2024():
@@ -213,12 +222,17 @@ def fig5_2024():
   minidx1 = 4791
   minidx2 = 6874
   data = [fil.bode_plot(freqs=betas, show=False) for fil in [f1, f2, f3, fall]]
+  datalabels = [r'$\beta_{peak}$=1, $Q_3$=7.8, $S$=1.7e3', r'$\beta_{peak}$=1.5, $Q_3$=12, $S$=1.7e3', r'$\beta_{peak}$=2, $Q_3$=16, $S$=1.7e3', 'multi-band']
 
   fig, axs = plt.subplots(2, 2, constrained_layout=True)
 
-  for d in data:
-    axs[0][0].plot(d[0], d[1])
+  for idx in range(4):
+    d = data[idx]
+    axs[0][0].plot(d[0], d[1], label=datalabels[idx])
     axs[0][1].plot(d[0], d[2])
+  axs[0][0].legend()
+  axs[0][0].set_xlabel(r'$\beta$')
+  axs[0][1].set_xlabel(r'$\beta$')
   gs = axs[1][0].get_gridspec()
   for ax in axs[1]:
     ax.remove()
@@ -234,9 +248,12 @@ def fig5_2024():
   errors = [abs(estimated[i]/expected[i]-1) for i in range(9)]
 
   axbig.bar(labels, errors)
+  axbig.set_title('Relative Error in Computed Characteristics for Designed Multi-Band Filters')
+
+  fig.suptitle('Use of Single-Band Filter Design Method for Multi-Band Filters')
   plt.show()
 
-def fig1_pending():
+def fig1_2024rational():
   fils = [Filter(Ap=0.05, bp=1, Bu=v) for v in [2, 2.5, 3]]
   freqs = np.geomspace(0.8, 1.2, 10000)
   responses = [fil.filter.tf(1j*freqs) for fil in fils]
@@ -245,11 +262,14 @@ def fig1_pending():
   twodb = helpers.mag2db(abs(responses[0]))
   twopointfivedb = helpers.mag2db(abs(responses[1]))
   threedb = helpers.mag2db(abs(responses[2]))
-  axs[0].semilogx(freqs, twodb-max(twodb))
-  axs[0].semilogx(freqs, twopointfivedb-max(twopointfivedb), ls='--')
-  axs[0].semilogx(freqs, threedb-max(threedb), ls=':')
+  axs[0].semilogx(freqs, twodb-max(twodb), label='$B_u$=2')
+  axs[0].semilogx(freqs, twopointfivedb-max(twopointfivedb), ls='--', label='$B_u$=2.5')
+  axs[0].semilogx(freqs, threedb-max(threedb), ls=':', label='$B_u$=3')
+  axs[0].xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
+  axs[0].xaxis.set_minor_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
   axs[0].set_ylabel('Magnitude (dB)')
   axs[0].set_xlabel(r'$\beta$')
+  axs[0].legend()
 
   twocyc = np.unwrap(np.angle(responses[0])) / (2 * np.pi)
   twopointfivecyc = np.unwrap(np.angle(responses[1])) / (2 * np.pi)
@@ -257,11 +277,15 @@ def fig1_pending():
   axs[1].semilogx(freqs, twocyc-twocyc[0])
   axs[1].semilogx(freqs, twopointfivecyc-twopointfivecyc[0], ls='--')
   axs[1].semilogx(freqs, threecyc-threecyc[0], ls=':')
+  axs[0].xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
+  axs[0].xaxis.set_minor_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
   axs[1].set_ylabel('Phase (cyc)')
   axs[1].set_xlabel(r'$\beta$')
+
+  fig.suptitle('Flexibility of behavior with non-integer $B_u$ TFs with $b_p$=1, $A_p$=5e-2')
   plt.show()
 
-def fig2_pending():
+def fig2_2024rational():
   Ncycs = []
   Qerbs = []
   Q10s = []
@@ -279,11 +303,11 @@ def fig2_pending():
   plt.plot(range(2, 9), Q10s, label=r'Q$_{10}$')
   plt.plot(range(2, 9), Q3s, label=r'Q$_{3}$')
   plt.plot(range(2, 9), Q15s, label=r'Q$_{15}$')
-  plt.axhline(y=0, color='k', ls=':')
+  # plt.axhline(y=0, color='k', ls=':')
   plt.legend()
   plt.show()
 
-def fig3_pending():
+def fig3_2024rational():
   fil = Filter(Ap=0.05, bp=1, Bu=2, cf=1)
   pairs = [(1, 20), (5, 50), (7/8, 70), (1/5, 40)]
   def tones(t):
@@ -304,7 +328,7 @@ def fig3_pending():
   fig.suptitle('Processing using non-integer TF representation, B$_u$=2.5e+00, A$_p$=5.0e-02, b$_p$=1')
   plt.show()
 
-def fig4_pending():
+def fig4_2024rational():
   fils1 = [Filter(Ap=Ap, bp=1, Bu=Bu) for Ap, Bu in [(0.15, 3), (0.15, 5), (0.045, 5)]]
   fils2 = [Filter(Ap=0.15, bp=1, Bu=Bu) for Bu in [1.5, 2, 2.5, 3]]
 
@@ -315,7 +339,7 @@ def fig4_pending():
     _, ir = fil.impulse_response_plot(times=timestamps, show=False)
     maxir = max(ir)
     ax1.plot(timestamps, [v/maxir for v in ir])
-  ax1.set_title('dependence of behavior of h on values of constants for integer Bᵤ')
+  ax1.set_title('dependence of behavior of h on values of constants for integer B$_u$')
   ax1.set_xlabel(r'h($\widetilde{t}$)')
   ax1.set_ylabel(r'$\widetilde{t}$')
   ax1.axhline(y=0, color='k', ls=':')
@@ -325,13 +349,13 @@ def fig4_pending():
     _, ir = fil.impulse_response_plot(times=timestamps, show=False)
     maxir = max(ir)
     ax2.plot(timestamps, [v/maxir for v in ir])
-  ax2.set_title('h and phase of oscillatory component for integer and half-integer Bᵤ')
+  ax2.set_title('h and phase of oscillatory component for integer and half-integer B$_u$')
   ax2.set_xlabel(r'h($\widetilde{t}$)')
   ax2.set_ylabel(r'$\widetilde{t}$')
   ax2.axhline(y=0, color='k', ls=':')
   plt.show()
 
-def fig7_pending():
+def fig7_2024rational():
   fil = Filter(Ap=0.1, bp=1, Bu=1.75, cf=1)
   sig = Signal.linear_chirp(f_init=-2, f_final=2, fs=30, num_samples=3000) # set this to be able to be ttilde
   sig = Signal(mode='ttilde', data=sig.get_data('t'), fs=30)
@@ -346,7 +370,7 @@ def fig7_pending():
   axs[1][1].imshow(abs(winsol[0:21][::-1]), cmap='gray', aspect='auto', extent=(0, solbound[1], 0, solbound[3]/5))
   plt.show()
 
-def fig8_pending():
+def fig8_2024rational():
   sig = Signal.from_function(mode='ttilde', func=(lambda t: t*np.cos(10*t)*np.exp(-t/2) + t**3*np.exp(-t)*np.cos(t)), fs=10, num_samples=1000)
   pairs = [(1, 20), (5, 50), (7/8, 70), (1/5, 40)]
   def tones(t):
@@ -360,19 +384,19 @@ def fig8_pending():
 
   fig, (ax1, ax2) = plt.subplots(2, 1, constrained_layout=True)
   ax1.plot(sig.timestamps, sig.get_data('ttilde'))
-  ax1.set_ylabel('input')
+  ax1.set_ylabel('input') # what does this label mean?
 
   fil = Filter(Ap=0.15, bp=1, Bu=5)
   for method in ['tf', 'ir', 'ode', 'fde']:
     sol = fil.solve(sig, method=method).get_data('ttilde')
     maxsol = max(sol)
     ax2.plot(sig.timestamps, [v/maxsol for v in sol], ls=':', label=method) # add legend
-  ax2.set_ylabel('output')
+  ax2.set_ylabel('output') # overwritten label?
   ax2.set_ylabel(r'$\widetilde{t}$')
   fig.suptitle('equivalence of representations A$_p$=0.15, b$_p$=1, B$_u$=5')
   plt.show()
 
-def fig9_pending():
+def fig9_2024rational():
   Ap = 0.04
   bp = 1
   Bu = 1.5
@@ -393,19 +417,19 @@ def fig9_pending():
 
 if __name__ == "__main__":
   # fig3_2019()
-  fig6_2019()
+  # fig6_2019()
   # fig8_2019()
   # fig2_2022()
   # fig1_2024()
   # fig3_2024()
   # fig5_2024()
-  # fig1_pending()
-  # fig2_pending()
-  # fig3_pending()
-  # fig4_pending()
-  # fig7_pending()
-  # fig8_pending()
-  # fig9_pending()
+  fig1_2024rational()
+  fig2_2024rational()
+  fig3_2024rational()
+  # fig4_2024rational()
+  # fig7_2024rational()
+  # fig8_2024rational()
+  # fig9_2024rational()
 
   # example for all four plots for cochlea
   # one example of filter using rational characteristics

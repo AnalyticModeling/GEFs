@@ -158,7 +158,7 @@ class FilterBank:
     outputs = self.graph.propagate_down(signal, process)
     return OutputSignals(outputs, self.graph)
 
-  def bode_plot(self, freqs=None, peak_magndb=1, custom_title='Bode plot', show=True):
+  def bode_plot(self, freqs=None, custom_title='Bode plot', show=True):
     '''
     Generate simultaneous Bode plots of all Filters in FilterBank.
 
@@ -168,7 +168,7 @@ class FilterBank:
     '''
     if freqs is None:
       freqs = np.geomspace(0.01, 3*max(fil.get_computed_chars()['Bpeak'] for fil in self.filters), 10000)
-    fils = [fil.bode_plot(freqs=freqs, peak_magndb=peak_magndb, show=False)+[fil.uid] for fil in self.filters]
+    fils = [fil.bode_plot(freqs=freqs, show=False)+[fil.uid] for fil in self.filters]
 
     if show:
       fig, (ax1, ax2) = plt.subplots(2, 1)
