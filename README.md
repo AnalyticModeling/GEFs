@@ -4,8 +4,15 @@ The toolbox has been primarily developed for filter design and signal processing
 ## Capabilities for Filter Design and Filtering
 The toolset includes functionalities include filter construction and signal processing using filters for arbitrary filters and signals. It also includes filter design functionalities specific to a class of bandpass filters (referred to as GEFs) and related classes of bandpass filters, multiband filters, and filterbanks. GEFs are bandpass LTI filters with a pair of poles repeated $B_u$ times.
 
-### General Filters and Signals: Constructing Arbitrary Filters, Filterbanks, and Multiband Filters
-* Arbitrary filters may be constructed - e.g. using provided poles and zeros, then used for filtering any signal.
+### General Filters and Signals: Constructing Arbitrary Filters and Multiband Filters
+* Arbitrary filters may be constructed - e.g. using provided poles and zeros or by provided a transfer function, then used for filtering any signal.
+* Parameterized filters using the parameterized model in [1] representing cochleas are constructed with the transfer function (in terms of $s$) $C\frac{1}{((s-p)(s-\overline{p}))^{B_u}}$ when modeling pressure and $C\frac{(s+A_p)}{((s-p)(s-\overline{p}))^{B_u+1}}$ when modeling velocity, where $p = ib_p-A_p$. The variables $A_p$, $b_p$, and $B_u$ can be directly inputted into the model, while $C$ can be inputted in two different ways.
+* Parameterized filters may also be constructed by specifying the resulting characteristics a filter is supposed to be have (e.g. bandwidth), and the program will estimate appropriate original parameters.
+* Multiband filters can be constructed from providing lists of parameters/characteristics
+
+### General Filters and Signals: Filterbanks and Cochleas
+* Filterbanks are treated as graphs on filters. The most common filterbanks will have filters in series or parallel.
+* Cochleas are examples of filterbanks with extra functionality attached. They may also be specified by providing only a species, in which case default values are used.
 
 ### General Filters and Signals: Filtering
 * A signal provided as a time-series or a frequency response may be inputted into a constructed or designed filter, filterbank, or multiband filter.
@@ -28,8 +35,8 @@ The toolset includes functionalities include filter construction and signal proc
 ### GEFs: Potential Signal Processing Applications for GEFs
 * Potential applications may benefit from the direct specification over desired characteristics as well as the fine control over the characteristics enabled by the rational exponents primarily include those that make use of bandpass filterbanks and multiband filters. Such applications may include: parameteric equalizers, a front end for speech processing, microseismic signal analysis, and signal classification. <!-- XXX INSERT.  -->
 
-### GEFs: Filters Related to GEFs
-* Filters related to GEFs include the gammatone family of filters - e.g. Gammatone Filters (GTFs), All-Pole Gammatone Filters (APGFs), One-zero Gammatone Filters (OZGFs) [5]
+<!-- ### GEFs: Filters Related to GEFs
+* Filters related to GEFs include the gammatone family of filters - e.g. Gammatone Filters (GTFs), All-Pole Gammatone Filters (APGFs), One-zero Gammatone Filters (OZGFs) [5] -->
 
 ### GEFs: Highlights for GEFs and Rational GEFs
 * Allows for designing filters, filterbanks, and multiband filters by directly dictating or controling specifications on desired filter characteristics such as peak frequencies, quality factors and group delays.
@@ -65,7 +72,7 @@ This can be done globally or using a virtual environment - e.g. [see here](https
 
 ## Contributing
 <!-- Before submitting a pull request, please run the tutorial files `tutorial.py`, `alkhairy2019.m`, and `alkhairy2024.m` to make sure that the changes do not break the code. Future releases may include dedicated unit tests. -->
-Before submitting a pull request, please run the tutorial files `demo_alkhairy2019.py` and `demo_alkhairy2019.py` to make sure that the changes do not break the code. Future releases may include dedicated unit tests.
+Before submitting a pull request, please run the tutorial files `demo_alkhairy2019.py` and `demo_alkhairy.m` to make sure that the changes do not break the code. Future releases may include dedicated unit tests.
 
 ## Contributors
 Wayne Zhao
