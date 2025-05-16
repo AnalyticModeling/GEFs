@@ -3,12 +3,12 @@ from FilterBank import *
 from Signal import *
 from OutputSignals import *
 from Cochlea import *
-import scipy.signal as spsig
+# import scipy.signal as spsig
 
 def filter_init():
   f1 = Filter(tf=(lambda s: 1/(1+s+s**2)))
   f1.bode_plot()
-  f2 = Filter(ir=(lambda t: np.sin(t)/t if t != 0 else 1))
+  f2 = Filter(ir=(lambda t: t*np.exp(-t)*np.sin(t)))
   f2.bode_plot()
   f3 = Filter(coeffs=[[1], [1, 1, 1]])
   f3.bode_plot()
@@ -53,6 +53,7 @@ def filter_solve():
   func = lambda t: np.exp(-1/15*(t-20)**2) * np.cos(t)
 
   sig = Signal(mode='ttilde', data=[func(t/20) for t in range(2000)], fs=20)
+  sig.plot()
 
   anstf = f.solve(sig, method='tf')
   anstf /= max(anstf.mode_t)
@@ -100,6 +101,8 @@ def filter_bode():
   f2.bode_plot()
   f3 = Filter(Bpeak=1.5, Nbeta=11.1, phiaccum=3.5)
   f3.bode_plot()
+  # f4 = Filter(fpeak=1.5, Nbeta=11.1, phiaccum=3.5, cf=1.5)
+  # f4.bode_plot(freqs=)
 
 def filter_frequency_real_imag():
   f1 = Filter(tf=(lambda s: 1/(1+s+s**2)))
@@ -198,10 +201,12 @@ def signal_envelope_analytic():
   plt.plot(xaxis, new_sig['t'])
   plt.plot(xaxis, upper)
   plt.plot(xaxis, lower)
+  plt.xlabel('Time (ms)')
   plt.show()
 
 def filterbank_add():
   fs = FilterBank(topology='parallel', Ap=[0.1, 0.1], bp=[0.5, 1.0], Bu=[3, 3])
+  fs.bode_plot()
   fs.add(Filter(Ap=0.1, bp=1.5, Bu=3), source=fs.filters[-1])
   fs.bode_plot()
 
@@ -264,7 +269,7 @@ def outputsignals_correlogram():
 
 def cochlea_init():
   c = Cochlea(Ap=[0.3768*np.exp(-0.1*i) for i in range(4)], bp=[0.5, 1, 1.5, 2], Bu=[3.714*np.exp(0.03*i) for i in range(4)])
-  c.bode_plot()
+  c.bode_plot(betas=np.geomspace(0.1, 6, 10000))
 
 def cochlea_at_location():
   c = Cochlea(Ap=[0.3768*np.exp(-0.1*i) for i in range(4)], bp=[0.5, 1, 1.5, 2], Bu=[3.714*np.exp(0.03*i) for i in range(4)])
@@ -288,8 +293,12 @@ def cochlea_heatmap():
       fi, ti = pairs[i]
       ans += np.exp(-((t-ti)/50)**2) * np.sin(2*np.pi*fi*t)
     return ans
-  sig = Signal(mode='t', data=[tones(t/100) for t in range(100000)], fs=100)
-  c.signal_response_heatmap(sig)
+  # sig = Signal(mode='t', data=[tones(t/100) for t in range(100000)], fs=100)
+  # sig = Signal(mode='t', data=[tones(t/10) for t in range(10000)], fs=10)
+  sig = Signal(mode='t', data=[tones(t) for t in range(100)], fs=1)
+  ans = c.signal_response_heatmap(sig)
+  print(ans[0][:100])
+  print(len(ans))
 
 if __name__ == "__main__":
   # filter_init()
@@ -314,9 +323,9 @@ if __name__ == "__main__":
   # signal_get_data()
   # signal_resample()
   # signal_envelope_analytic()
-  filterbank_add()
+  # filterbank_add()
   # filterbank_process_signal()
-  # filterbank_bode()
+  filterbank_bode()
   # outputsignals_init_kindof()
   # outputsignal_autocorrelates()
   # outputsignal_correlate_with()

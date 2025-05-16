@@ -1,7 +1,7 @@
 classdef Cochlea < FilterBank
-    % properties
-    %     PyCochlea
-    % end
+    properties
+        PyCochlea
+    end
     methods
         function obj = Cochlea(options)
             arguments
@@ -61,7 +61,7 @@ classdef Cochlea < FilterBank
                     cfs=options.cfs, ...
                     rho=options.rho, ...
                     betas=options.betas, ...
-                    freqs=options.freqs)
+                    freqs=options.freqs);
             else
                 pyCo = py.Cochlea.Cochlea(species=options.species, ...
                     type=options.type, ...
@@ -97,7 +97,7 @@ classdef Cochlea < FilterBank
                     freqs=options.freqs);
             end
             obj@FilterBank(pyfilterbank=pyCo)
-            % obj.PyCochlea = pyCo
+            obj.PyCochlea = pyCo
         end
         function fil = filter_at_location(obj, x_coord, options)
             arguments
@@ -132,13 +132,15 @@ classdef Cochlea < FilterBank
                 title(options.custom_title)
                 xlabel('Normalized frequencies (Hz)')
                 ylabel('Wavenumber (1/mm)')
+                xline(obj.PyCochlea.bp_apex, ':k')
+                yline(0, ':k')
             end
         end
         function [betas, reals, imags] = plot_impedance(obj, options)
             arguments
                 obj
                 options.betas = string(missing)
-                options.custom_title = 'Normalized impedance (Z_norm)'
+                options.custom_title = 'Normalized impedance (Z_{norm})'
                 options.show = true
                 options.phase_in_rad = true
             end
@@ -154,6 +156,8 @@ classdef Cochlea < FilterBank
                 title(options.custom_title)
                 xlabel('Normalized frequencies (Hz)')
                 ylabel('Normalized impedance (Ω/???)')
+                xline(obj.PyCochlea.bp_apex, ':k')
+                yline(0, ':k')
             end
         end
         function sigs = signal_response_heatmap(obj, signal, options)
@@ -166,6 +170,9 @@ classdef Cochlea < FilterBank
             end
             % there must be a shorter way to do this
             data = obj.PyFilterBank.signal_response_heatmap(signal.PySignal, len_xs=int32(options.len_xs), show=false);
+            signal.plot()
+            int32(options.len_xs)
+            data
             data = cellfun(@double, cell(data), UniformOutput=false);
             sigs = [];
             for row = data

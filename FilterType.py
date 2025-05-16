@@ -90,8 +90,6 @@ class Arbitrary(AbstractFilter):
       origbetas = scipy.fft.rfftfreq(siglen, d=1/samprate)
       chars = helpers.computedfiltercharacteristics(tfunc=(lambda f: np.interp(f, origbetas, tfapprox)), betas=betas)
 
-      # np.interp
-
     if tf is not None:
       if ir is not None:
         raise Exception('Only one of tf and ir should be used to initialize Filter')
@@ -189,6 +187,8 @@ class Parameterized(AbstractFilter):
       self.orig_chars = chars
     else:
       for k in ['Bpeak', 'Qerb', 'ERBbeta', 'Qn', 'Qn2', 'BWndBbeta', 'BWn2dBbeta', 'Sbeta']:
+        if k in chars:
+            print(chars[k])
         if k in chars and chars[k] < 0:
           raise Exception(f'{k} should not be negative')
       self.orig_chars = {k:v for k, v in chars.items()}
@@ -229,6 +229,9 @@ class Parameterized(AbstractFilter):
       curr_peak_magn = max(abs(np.array([temp_tf(x*1j) for x in betas])))
       peak_magn = np.power(10, self.peak_magndb/20)
       C = peak_magn/curr_peak_magn
+    # print(C)
+    # print(Ap, bp, Bu)
+    # tf = temp_tf
     tf = lambda s: C * temp_tf(s)
 
     chars = helpers.computedfiltercharacteristics(tfunc=tf, betas=betas)

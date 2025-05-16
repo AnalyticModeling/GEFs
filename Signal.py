@@ -100,6 +100,7 @@ class Signal:
 
   @classmethod
   def linear_chirp(cls, f_init=1, w_init=None, f_final=10, w_final=None, fs=1, num_samples=9):
+  # def linear_chirp(cls, f0=1, w0=None, t1=None, f1=10, w1=None, fs=1, num_samples=9):
     '''
     Generates linear chirp with initial instantaneous frequency either
     f_init or w_init and final instantaneous frequency either f_final or w_final.
@@ -170,7 +171,7 @@ class Signal:
 
   def __add__(self, other):
     if isinstance(other, (int, float, np.integer, np.floating)):
-      return Signal(mode='t', data=[self.mode_t[i]+other for i in range(self.length)], fs=self.fs)
+      return Signal(mode=self.mode, data=[self.mode_t[i]+other for i in range(self.length)], fs=self.fs)
     else:
       if isinstance(other, Signal):
         if self.fs != other.fs:
@@ -178,14 +179,14 @@ class Signal:
         self_t, other_t = self._pad_time_series_to_same_length(other.mode_t)
       else:
         self_t, other_t = self._pad_time_series_to_same_length(other)
-      return Signal(mode='t', data=[self_t[i]+other_t[i] for i in range(self.length)], fs=self.fs)
+      return Signal(mode=self.mode, data=[self_t[i]+other_t[i] for i in range(self.length)], fs=self.fs)
 
   def __radd__(self, other):
-    return Signal(mode='t', data=[other+self.mode_t[i] for i in range(self.length)], fs=self.fs)
+    return Signal(mode=self.mode, data=[other+self.mode_t[i] for i in range(self.length)], fs=self.fs)
 
   def __sub__(self, other):
     if isinstance(other, (int, float, np.integer, np.floating)):
-      return Signal(mode='t', data=[self.mode_t[i]-other for i in range(self.length)], fs=self.fs)
+      return Signal(mode=self.mode, data=[self.mode_t[i]-other for i in range(self.length)], fs=self.fs)
     else:
       if isinstance(other, Signal):
         if self.fs != other.fs:
@@ -193,11 +194,11 @@ class Signal:
         self_t, other_t = self._pad_time_series_to_same_length(other.mode_t)
       else:
         self_t, other_t = self._pad_time_series_to_same_length(other)
-      return Signal(mode='t', data=[self_t[i]-other_t[i] for i in range(self.length)], fs=self.fs)
+      return Signal(mode=self.mode, data=[self_t[i]-other_t[i] for i in range(self.length)], fs=self.fs)
 
   def __mul__(self, other):
     if isinstance(other, (int, float, np.integer, np.floating)):
-      return Signal(mode='t', data=[self.mode_t[i]*other for i in range(self.length)], fs=self.fs)
+      return Signal(mode=self.mode, data=[self.mode_t[i]*other for i in range(self.length)], fs=self.fs)
     else:
       if isinstance(other, Signal):
         if self.fs != other.fs:
@@ -205,14 +206,14 @@ class Signal:
         self_t, other_t = self._pad_time_series_to_same_length(other.mode_t)
       else:
         self_t, other_t = self._pad_time_series_to_same_length(other)
-      return Signal(mode='t', data=[self_t[i]*other_t[i] for i in range(self.length)], fs=self.fs)
+      return Signal(mode=self.mode, data=[self_t[i]*other_t[i] for i in range(self.length)], fs=self.fs)
 
   def __rmul__(self, other):
-    return Signal(mode='t', data=[other*self.mode_t[i] for i in range(self.length)], fs=self.fs)
+    return Signal(mode=self.mode, data=[other*self.mode_t[i] for i in range(self.length)], fs=self.fs)
 
   def __truediv__(self, other):
     if isinstance(other, (int, float, np.integer, np.floating)):
-      return Signal(mode='t', data=[self.mode_t[i]/other for i in range(self.length)], fs=self.fs)
+      return Signal(mode=self.mode, data=[self.mode_t[i]/other for i in range(self.length)], fs=self.fs)
     else:
       if isinstance(other, Signal):
         if self.fs != other.fs:
@@ -220,25 +221,25 @@ class Signal:
         self_t, other_t = self._pad_time_series_to_same_length(other.mode_t)
       else:
         self_t, other_t = self._pad_time_series_to_same_length(other)
-      return Signal(mode='t', data=[self_t[i]/other_t[i] for i in range(self.length)], fs=self.fs)
+      return Signal(mode=self.mode, data=[self_t[i]/other_t[i] for i in range(self.length)], fs=self.fs)
 
   def __mod__(self, other):
-    return Signal(mode='t', data=[self.mode_t[i]%other for i in range(self.length)], fs=self.fs)
+    return Signal(mode=self.mode, data=[self.mode_t[i]%other for i in range(self.length)], fs=self.fs)
 
   def __floordiv__(self, other):
-    return Signal(mode='t', data=[self.mode_t[i]//other for i in range(self.length)], fs=self.fs)
+    return Signal(mode=self.mode, data=[self.mode_t[i]//other for i in range(self.length)], fs=self.fs)
 
   def __pow__(self, other):
-    return Signal(mode='t', data=[self.mode_t[i]**other for i in range(self.length)], fs=self.fs)
+    return Signal(mode=self.mode, data=[self.mode_t[i]**other for i in range(self.length)], fs=self.fs)
 
   def __neg__(self):
-    return Signal(mode='t', data=[-self.mode_t[i] for i in range(self.length)], fs=self.fs)
+    return Signal(mode=self.mode, data=[-self.mode_t[i] for i in range(self.length)], fs=self.fs)
 
   def __pos__(self):
     return self
 
   def __abs__(self):
-    return Signal(mode='t', data=[abs(self.mode_t[i]) for i in range(self.length)], fs=self.fs)
+    return Signal(mode=self.mode, data=[abs(self.mode_t[i]) for i in range(self.length)], fs=self.fs)
 
   def at_time(self, t, tolerance=1e-10):
     '''
@@ -453,10 +454,10 @@ class Signal:
     d = self.get_data(mode=mode)
     if mode == 't':
       plt.plot(self.timestamps, d)
-      plt.xlabel('Time (s)')
+      plt.xlabel('Time (ms)')
     elif mode == 'ttilde':
       plt.plot(self.timestamps, d)
-      plt.xlabel('Normalized time (something)')
+      plt.xlabel('Normalized time (ms/kHz)')
     elif mode == 'f':
       plt.plot(scipy.fft.rfftfreq(len(self.mode_t), 1/self.fs), [abs(v) for v in d])
       plt.xlabel('Magnitude of frequency')

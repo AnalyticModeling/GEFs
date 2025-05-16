@@ -37,8 +37,9 @@ classdef OutputSignals
             end
             n = obj.numSignals-1;
             sigLen = int32(obj.PyOutputSignals.signal_length);
+            obj.PyOutputSignals
             fullxaxis = double(-sigLen+1:sigLen-1) ...
-                ./ double(obj.PyOutputSignals.signal_sample_rate);
+                ./ double(obj.PyOutputSignals.signal_fs);
             tiledlayout(n, n, TileSpacing='tight')
             for y = 2:n+1
                 for x = 1:n
@@ -62,7 +63,7 @@ classdef OutputSignals
             if nargin == 1
                 custom_title = 'Autocorrelates';
             end
-            tiledlayout(1, obj.numSignals, TileSpacing='tight')
+            tiledlayout(obj.numSignals, 1, TileSpacing='tight')
             xlim = int32(obj.PyOutputSignals.signal_length);
             for i = 1:obj.numSignals
                 nexttile
@@ -75,7 +76,7 @@ classdef OutputSignals
             if nargin == 2
                 custom_title = 'Correlations';
             end
-            tiledlayout(1, obj.numSignals, TileSpacing='tight')
+            tiledlayout(obj.numSignals, 1, TileSpacing='tight')
             xlim = int32(obj.PyOutputSignals.signal_length);
             for i = 1:obj.numSignals
                 nexttile

@@ -167,7 +167,7 @@ class FilterBank:
     See `Filter.bode_plot` for more details on arguments.
     '''
     if freqs is None:
-      freqs = np.geomspace(0.01, 3*max(fil.get_computed_chars()['Bpeak'] for fil in self.filters), 10000)
+      freqs = np.geomspace(0.01, 3*max(fil.get_computed_chars()['Bpeak']*fil.cf for fil in self.filters), 10000)
     fils = [fil.bode_plot(freqs=freqs, show=False)+[fil.uid] for fil in self.filters]
 
     if show:
@@ -187,7 +187,7 @@ class FilterBank:
       ax2.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.1f')) # pick better formatter
       ax2.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
       ax2.set_ylabel('Phase (radians)')
-      ax2.set_xlabel('Normalized frequency')
+      ax2.set_xlabel('Frequency (kHz)')
 
       plt.show()
     return fils

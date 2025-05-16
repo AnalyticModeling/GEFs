@@ -18,16 +18,27 @@ classdef Signal
                 options.w_final = string(missing)
                 options.freq_func = string(missing)
                 options.freqs = string(missing)
-                options.init_phase = string(missing)
+                options.init_phase = 0
                 options.pysignal = string(missing)
             end
             if ismissing(options.pysignal)
                 if ~ismissing(options.func)
-                    pySig = py.Signal.Signal.from_function(mode=options.mode, func=options.func, fs=options.fs, evenlen=options.evenlen);
+                    if (options.mode == "t") || (options.mode == "ttilde")
+                        sample_points = (0:(options.num_samples-1))/options.fs;
+                    else
+                        sample_points = options.fs*(0:(options.num_samples-1))/options.num_samples;
+                    end
+                    pySig = py.Signal.Signal(mode=options.mode, data=options.func(sample_points), fs=options.fs, evenlen=options.evenlen);
                 elseif ~ismissing(options.f_init) || ~ismissing(options.w_init)
                     pySig = py.Signal.Signal.linear_chirp(f_init=options.f_init, w_init=options.w_init, f_final=options.f_final, w_final=options.w_final, fs=options.fs, num_samples=options.num_samples);
                 elseif ~ismissing(options.freq_func)
-                    pySig = py.Signal.Signal.from_instantaneous_frequency(freq_func=options.freq_func, freqs=options.freqs, init_phase=options.init_phase, fs=options.fs, num_samples=options.num_samples);
+                    % freq_func isn't like func?
+                    if ~ismissing(options.freqs)
+                        freqs = options.freqs;
+                    else
+                        freqs = 2 * pi * options.freq_func((0:(options.num_samples-1))/options.fs);
+                    end
+                    pySig = py.Signal.Signal.from_instantaneous_frequency(freqs=freqs, init_phase=options.init_phase, fs=options.fs, num_samples=options.num_samples);
                 else
                     pySig = py.Signal.Signal(mode=options.mode, data=options.data, fs=options.fs);
                 end
@@ -35,7 +46,7 @@ classdef Signal
                 pySig = options.pysignal;
             end
             obj.PySignal = pySig;
-            obj.length = pySig.length;
+            obj.length = int32(pySig.length);
         end
         function r = plus(a, b)
             if isa(a, 'Signal'); s1 = a.PySignal; else; s1 = a; end
@@ -98,11 +109,11 @@ classdef Signal
             end
             dataseries = double(obj.PySignal.get_data(mode));
         end
-        function newsig = resample(obj, new_sample_rate, end_time)
+        function newsig = resample(obj, new_fs, end_time)
             if nargin == 2
-                newsig = Signal(pysignal=obj.PySignal.resample(new_sample_rate));
+                newsig = Signal(pysignal=obj.PySignal.resample(new_fs));
             else
-                newsig = Signal(pysignal=obj.PySignal.resample(new_sample_rate, end_time));
+                newsig = Signal(pysignal=obj.PySignal.resample(new_fs, end_time));
             end
         end
         function [upper, lower] = envelope_analytic(obj)
@@ -136,24 +147,39 @@ classdef Signal
             end
             output = obj.PySignal.spectrogram(win=options.win, hop=int32(options.hop), mfft=int32(options.mfft), ...
                 custom_title=options.custom_title, show=options.show);
-            output
+            % output
             sfft = 0;
             bounds = 0;
         end
         function r = crosscorrelate(a, b)
             r = double(pyrun('res=s1.crosscorrelate(s2)', 'res', s1=a.PySignal, s2=b.PySignal));
         end
-        function corr = autocorrelate(obj, options)
+        function corr = autocorrelate(obj)
+            corr = obj.PySignal.autocorrelate();
+        end
+        function autocorrelate_plot(obj, options)
             arguments
                 obj
                 options.custom_title = 'Autocorrelation'
                 options.show = true
             end
-            corr = obj.PySignal.autocorrelate(show=false);
-            % incomplete
+            obj.PySignal.autocorrelate_plot(show=false);
+            % not quite?
         end
-        function plot(obj)
-            plot(obj.PySignal.timestamps, obj.PySignal.mode_t)
+        function plot(obj, options)
+            arguments
+                obj
+                options.mode = 't'
+                options.custom_title = string(missing)
+            end
+            if (options.mode == "t") || (options.mode == "ttilde")
+                plot(obj.PySignal.timestamps, obj.PySignal.mode_t)
+                xlabel('Time (ms)')
+            else
+                plot(obj.PySignal.timestamps, obj.PySignal.mode_f)
+                xlabel('Normalized time')
+            end
+            title(options.custom_title)
         end
     end
 end

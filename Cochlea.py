@@ -12,7 +12,7 @@ class Cochlea(FilterBank):
   '''
   Model of Cochlea (a subclass of FilterBank)
   '''
-  def __init__(self, species=None, type=None, CF0=20, l_factor=3.8, length=20, xs=None, cfs=None, rho=1.000, Ap=None, bp=None, Bu=None, gain_const=None, peak_magndb=None, Bpeak=None, fpeak=None, phiaccum=None, Nbeta=None, Nf=None, Qerb=None, ERBbeta=None, ERBf=None, Qn=None, Qn2=None, BWndBbeta=None, BWndBf=None, BWn2dBbeta=None, BWn2dBf=None, Sbeta=None, Sf=None, n=10, n2=3, betas=None, freqs=None):
+  def __init__(self, species=None, type=None, CF0=20, l_factor=3.8, length=20, xs=None, cfs=None, num_filters=None, rho=1.000, Ap=None, bp=None, Bu=None, gain_const=None, peak_magndb=None, Bpeak=None, fpeak=None, phiaccum=None, Nbeta=None, Nf=None, Qerb=None, ERBbeta=None, ERBf=None, Qn=None, Qn2=None, BWndBbeta=None, BWndBf=None, BWn2dBbeta=None, BWn2dBf=None, Sbeta=None, Sf=None, n=10, n2=3, betas=None, freqs=None):
     '''
     Initializes Cochlea. Most arguments are the same as for `FilterBank` object.
 
@@ -29,6 +29,8 @@ class Cochlea(FilterBank):
         and the restrictions on lengths of vectors are the same as for `FilterBank`
     '''
     if species is not None:
+      if num_filters is None:
+        num_filters = 4
       CF0, l_factor, length = self._given_species(species)
     self.cochlea_length = length
     self.cf = (lambda x: CF0*np.exp(-x/l_factor))
@@ -262,7 +264,7 @@ class Cochlea(FilterBank):
     '''
     sigs = []
     cfs = []
-    for x in np.linspace(0.025, self.cochlea_length, len_xs):
+    for x in np.geomspace(0.025, self.cochlea_length, len_xs):
       fil = self.filter_at_location(x)
       cfs += [round(self.cf(x), 2)]
       sig = fil.solve(signal, method='tf')

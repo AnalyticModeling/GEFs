@@ -38,7 +38,7 @@ classdef FilterBank
                 options.n2 = 3
                 options.betas = string(missing)
                 options.freqs = string(missing)
-                options.peak_freq = string(missing)
+                options.cf = string(missing)
                 options.pyfilterbank = string(missing)
             end
             if ismissing(options.pyfilterbank)
@@ -73,12 +73,15 @@ classdef FilterBank
                     n2=options.n2, ...
                     betas=options.betas, ...
                     freqs=options.freqs, ...
-                    peak_freq=options.peak_freq);
+                    cf=options.cf);
             else
                 pyFb = options.pyfilterbank;
             end
             obj.PyFilterBank = pyFb;
             obj.numFilters = length(pyFb.filters);
+            % cellarr = cell(pyFb.filters)
+            % f1 = cellarr{1}
+            % Filter(pyfilter=f1)
             obj.filters = cellfun(@(x) Filter(pyfilter=x), cell(pyFb.filters));
         end
         function len = length(obj)
@@ -104,7 +107,7 @@ classdef FilterBank
         end
         function outsigs = process_signal(obj, signal, method)
             if nargin == 2
-                method = 'default';
+                method = string(missing);
             end
             outsigs = OutputSignals(pyoutputsignals=obj.PyFilterBank.process_signal(signal.PySignal, method));
         end

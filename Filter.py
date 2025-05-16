@@ -20,7 +20,7 @@ class Filter:
     - `tf`: Generates Filter given transfer function
     - `coeffs`: Uses `coeffs` as coefficients of numerator/denominator of transfer function
     - `roots`: Uses `roots` as zeros/poles of transfer function
-    - `Ap`, `bp`, `Bu`: Filter parameters as defined in Alkhairy (2019)
+    - `Ap`, `bp`, `Bu`: Filter parameters as defined in Alkhairy (2019). These will default to values corresponding to the apex of a human's cochlea if no other method is used
     - `Bpeak`, `fpeak`, `phiaccum`, `Nbeta`, `Nf`, `Qerb`, `ERBbeta`, `ERBf`, \
       `Qn`, `Qn2`, `BWndBbeta`, `BWndBf`, `BWn2dBbeta`, `BWn2dBf`, `Sbeta`, `Sf`: \
       Filter characteristics in Alkhairy (2019). A transfer function parameterized \
@@ -57,6 +57,8 @@ class Filter:
       n, n2: Subscripts of Qn and Qn2 if applicable
       betas, freqs: Values of beta/f (kHz) to use to computationally evaluate e.g. filter characteristics.
       cf: Characteristic frequency of filter
+
+    NOTE: When only fpeak is provided and not cf, cf instead defaults to the value of fpeak (this may be the intended behavior when only providing fpeak)
     '''
     self.uid = self._num_filters_made
     Filter._num_filters_made += 1
@@ -67,8 +69,14 @@ class Filter:
     has_roots = (roots is not None)
     has_params = any(param is not None for param in [Ap, bp, Bu])
     has_chars = any(characteristic is not None for characteristic in [Bpeak, fpeak, phiaccum, Nbeta, Nf, Qerb, ERBbeta, ERBf, Qn, Qn2, BWndBbeta, BWndBf, BWn2dBbeta, BWn2dBf, Sbeta, Sf])
-    if sum([has_coeffs, has_roots, has_tf, has_ir, has_params, has_chars]) != 1:
-      raise Exception('Exactly one filter representation should be used')
+    checksum = sum([has_coeffs, has_roots, has_tf, has_ir, has_params, has_chars])
+    if checksum != 1:
+      if checksum == 0:
+        Ap = 0.0424 # Qerb = 12.7*(20.823)^0.3, N = 0.8*Qerb, Ap = Bu/2/pi/N = e^(1.02/0.418)*1.25^(-1/0.418) / (2*pi*0.8*12.7*(20.823)^0.3)
+        bp = 1
+        Bu = 6.7285 # e^(1.02/0.418)*1.25^(-1/0.418)
+      else:
+        raise Exception('Exactly one filter representation should be used')
 
     self.in_terms_of_normalized = True
     if any(arg is not None for arg in [freqs, ERBf, BWndBf, BWn2dBf, Sf, Nf]):
@@ -76,10 +84,17 @@ class Filter:
         raise Exception('Please provide characteristic frequency of filter')
       self.in_terms_of_normalized = False
 
-    self.cf = 1 if cf is None else cf # ok if cf is unspecified if everything in terms of beta
+    if cf is None:
+      if fpeak is not None:
+        warnings.warn('Only fpeak has been provided. Did you mean to use cf instead of fpeak?')
+        self.cf = fpeak # users will probably use fpeak, even if this isn't expected behavior
+      else:
+        self.cf = 1
+    else:
+      self.cf = cf
 
     if freqs is not None: betas = [f/self.cf for f in freqs]
-    if fpeak is not None: Bpeak = fpeak/self.cf
+    # if fpeak is not None: Bpeak = fpeak/self.cf
     if ERBf is not None: ERBbeta = ERBf/self.cf
     if BWndBf is not None: BWndBbeta = BWndBf/self.cf
     if BWn2dBf is not None: BWn2dBbeta = BWn2dBf/self.cf
@@ -302,7 +317,7 @@ class Filter:
   def __call__(self, input, method='default', fs=1):
     return self.solve(input, method=method, fs=fs)
 
-  def bode_plot(self, freqs=None, custom_title='Bode plot', show=True):
+  def bode_plot(self, betas=None, freqs=None, xaxis_normalized=True, custom_title='Bode plot', show=True):
     '''
     Generate Bode plot of filter. Returns [x-axis (frequency) data, magnitudes (dB), phases (cycles)].
 
@@ -311,16 +326,26 @@ class Filter:
     Note transfer functions for Filters are internally stored as functions of normalized frequency, so `freqs` should also be normalized frequencies.
 
     Attributes:
+      betas: Normalized frequencies where transfer function is sampled (after multiplication by 1j)
       freqs: Frequencies (kHz) where transfer function is sampled (after multiplication by 1j)
       custom_title: Optional title of plot. Default is 'Bode plot'.
       show: `True` if plot is to be shown, `False` otherwise. Default is `True`.
     '''
-    if freqs is None:
-      xaxis = np.geomspace(0.1, 3*self.filter.chars['Bpeak'], 10000)
-    else:
+    xaxis_normalized = True
+    if betas is not None:
+      if freqs is not None:
+        raise Exception('Please enter only one of betas or freqs for the x-axis')
+      xaxis = np.array(betas)
+    elif freqs is not None:
       xaxis = np.array(freqs)
+      xaxis_normalized = False
+    else:
+      xaxis = np.geomspace(0.1, 3*self.filter.chars['Bpeak'], 10000)
 
-    response = self.filter.tf(1j*xaxis)
+    if xaxis_normalized:
+      response = self.filter.tf(1j*xaxis)
+    else:
+      response = self.filter.tf(1j*xaxis/self.cf)
     magns = helpers.mag2db(abs(response))
     phases = np.unwrap(np.angle(response)) / (2 * np.pi)
 
@@ -339,12 +364,15 @@ class Filter:
       ax2.xaxis.set_minor_locator(matplotlib.ticker.NullLocator())
       ax2.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
       ax2.set_ylabel('Phase (cycles)')
-      ax2.set_xlabel('Normalized frequency')
+      if xaxis_normalized:
+        ax2.set_xlabel('Normalized frequency')
+      else:
+        ax2.set_xlabel('Frequency (kHz)')
 
       plt.show()
     return [xaxis, magns, phases]
 
-  def frequency_real_imag_plot(self, freqs=None, custom_title='Frequency response plot', show=True):
+  def frequency_real_imag_plot(self, betas=None, freqs=None, custom_title='Frequency response plot', show=True):
     '''
     Similar to `bode_plot` except graphs real and imaginary parts of transfer function. Return [x-axis (frequency) data, real parts (kPa), imaginary parts (kPa)].
 
@@ -357,12 +385,21 @@ class Filter:
       custom_title: Optional title of plot. Default is 'Frequency response plot'.
       show: `True` if plot is to be shown, `False` otherwise. Default is `True`.
     '''
-    if freqs is None:
-      xaxis = np.geomspace(0.1, 1.5*self.filter.chars['Bpeak'], 10000)
-    else:
+    xaxis_normalized = True
+    if betas is not None:
+      if freqs is not None:
+        raise Exception('Please only enter only one of betas or freqs for the x-axis')
+      xaxis = np.array(betas)
+    elif freqs is not None:
       xaxis = np.array(freqs)
+      xaxis_normalized = False
+    else:
+      xaxis = np.geomspace(0.1, 3*self.filter.chars['Bpeak'], 10000)
 
-    response = self.filter.tf(1j*xaxis)
+    if xaxis_normalized:
+      response = self.filter.tf(1j*xaxis)
+    else:
+      response = self.filter.tf(1j*xaxis/self.cf)
     reals = [z.real for z in response]
     imags = [z.imag for z in response]
 
@@ -379,7 +416,10 @@ class Filter:
       ax2.xaxis.set_major_locator(locator=matplotlib.ticker.LogLocator(subs=(1, 2, 4, 6, 8)))
       ax2.xaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
       ax2.set_ylabel('Im(z)')
-      ax2.set_xlabel('Normalized frequency')
+      if xaxis_normalized:
+        ax2.set_xlabel('Normalized frequency')
+      else:
+        ax2.set_xlabel('Frequency (kHz)')
 
       plt.show()
     return [xaxis, reals, imags]
@@ -534,7 +574,7 @@ class Filter:
     if not isinstance(self.filter, Parameterized):
       raise Exception('Qn plot not guaranteed')
     params = self.filter.params
-    xaxis = range(1, max_n+1)
+    xaxis = list(range(1, max_n+1))
     Qns = [params['bp'] / 2 / params['Ap'] / (10 ** (n / 10 / params['Bu']) -1) ** 0.5 for n in xaxis]
     if show:
       plt.plot(xaxis, Qns)

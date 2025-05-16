@@ -34,11 +34,7 @@ def fig3_2019():
   plt.show()
 
 def fig6_2019():
-  c = Cochlea.five_param(type='V', aAp=0.3768, bAp=-0.1366, bp=[0.2, 0.5, 2, 5, 15], aBu=3.714, bBu=0.03123, xs=[i for i in range(5)])
-  # fils = c.bode_plot(freqs=np.geomspace(0.1, 20, 100000))
-  # plt.plot(betas, phases_cyc)
-  # plt.plot(betas, -np.gradient(phases_cyc, betas))
-  # plt.show()
+  c = Cochlea.five_param(type='V', aAp=0.3768, bAp=-0.1366, bp=1, aBu=3.714, bBu=0.03123, cfs=[0.2, 0.5, 2, 5, 15])
 
   fils = c.bode_plot(freqs=np.geomspace(0.1, 30, 100000), show=False)
 
@@ -52,18 +48,15 @@ def fig6_2019():
     xaxis, magn, phase, uid = fil
     ax1.semilogx(xaxis, magn, label=f'Q={round(chars["Qerb"], 2)}') # magn in db
     # ax2.semilogx(xaxis, phase, label=f'N={round(chars["Nbeta"], 2)}') # phase in cycles
-    ax2.plot(xaxis, phase, label=f'N={round(chars["Nbeta"], 2)}') # phase in cycles
+    ax2.semilogx(xaxis, phase, label=f'N={round(chars["Nbeta"], 2)}') # phase in cycles
   ax1.xaxis.set_major_locator(locator=matplotlib.ticker.LogLocator(subs=(1, 2, 5)))
   ax1.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
   ax1.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
   ax1.set_ylabel('Magnitude (dB)')
   ax1.legend()
 
-  # ax2.xaxis.set_major_locator(locator=matplotlib.ticker.LogLocator(subs=(1, 2, 5)))
-  # ax2.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
-  # ax2.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
   ax2.set_ylabel('Phase (cycles)')
-  ax2.set_xlabel('Normalized frequency')
+  ax2.set_xlabel('Frequency (kHz)')
   ax2.legend()
 
   plt.show()
@@ -152,27 +145,27 @@ def fig1_2024():
   Psharpdb = helpers.mag2db(abs(responses[1]))
   axs[0][0].semilogx(freqs, Pdb-max(Pdb), label='Modeled k')
   axs[0][0].semilogx(freqs, Psharpdb-max(Psharpdb), ls='--', label='Sharp approx.')
-  axs[0][0].set_title(r'mag{P} (dB)')
+  axs[0][0].set_ylabel(r'mag{P} (dB)')
   axs[0][0].legend()
 
   Pcyc = np.unwrap(np.angle(responses[0])) / (2 * np.pi)
   Psharpcyc = np.unwrap(np.angle(responses[1])) / (2 * np.pi)
   axs[1][0].semilogx(freqs, Pcyc-Pcyc[0])
   axs[1][0].semilogx(freqs, Psharpcyc-Psharpcyc[0], ls='--')
-  axs[1][0].set_title(r'phase{P} (cyc)')
+  axs[1][0].set_ylabel(r'phase{P} (cyc)')
   axs[1][0].set_xlabel(r'$\beta$')
 
   kre = [z.real for z in responses[2]]
   ksharpre = [z.real for z in responses[3]]
   axs[0][1].semilogx(freqs, kre)
   axs[0][1].semilogx(freqs, ksharpre, ls='--')
-  axs[0][1].set_title(r'Re{kᵦ}')
+  axs[0][1].set_ylabel(r'Re{kᵦ}')
 
   kim = [z.imag for z in responses[2]]
   ksharpim = [z.imag for z in responses[3]]
   axs[1][1].semilogx(freqs, kim)
   axs[1][1].semilogx(freqs, ksharpim, ls='--')
-  axs[1][1].set_title(r'Im{kᵦ}')
+  axs[1][1].set_ylabel(r'Im{kᵦ}')
   axs[1][1].set_xlabel(r'$\beta$')
 
   fig.suptitle('Validity of sharp-filter approximation ($A_p$=0.055, $B_u$=7)')
@@ -221,7 +214,7 @@ def fig5_2024():
 
   minidx1 = 4791
   minidx2 = 6874
-  data = [fil.bode_plot(freqs=betas, show=False) for fil in [f1, f2, f3, fall]]
+  data = [fil.bode_plot(betas=betas, show=False) for fil in [f1, f2, f3, fall]]
   datalabels = [r'$\beta_{peak}$=1, $Q_3$=7.8, $S$=1.7e3', r'$\beta_{peak}$=1.5, $Q_3$=12, $S$=1.7e3', r'$\beta_{peak}$=2, $Q_3$=16, $S$=1.7e3', 'multi-band']
 
   fig, axs = plt.subplots(2, 2, constrained_layout=True)
@@ -232,7 +225,9 @@ def fig5_2024():
     axs[0][1].plot(d[0], d[2])
   axs[0][0].legend()
   axs[0][0].set_xlabel(r'$\beta$')
+  axs[0][0].set_ylabel(r'mag{P} (dB)')
   axs[0][1].set_xlabel(r'$\beta$')
+  axs[0][1].set_ylabel(r'phase{P} (cyc)')
   gs = axs[1][0].get_gridspec()
   for ax in axs[1]:
     ax.remove()
@@ -277,8 +272,8 @@ def fig1_2024rational():
   axs[1].semilogx(freqs, twocyc-twocyc[0])
   axs[1].semilogx(freqs, twopointfivecyc-twopointfivecyc[0], ls='--')
   axs[1].semilogx(freqs, threecyc-threecyc[0], ls=':')
-  axs[0].xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
-  axs[0].xaxis.set_minor_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
+  axs[1].xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
+  axs[1].xaxis.set_minor_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
   axs[1].set_ylabel('Phase (cyc)')
   axs[1].set_xlabel(r'$\beta$')
 
@@ -304,7 +299,10 @@ def fig2_2024rational():
   plt.plot(range(2, 9), Q3s, label=r'Q$_{3}$')
   plt.plot(range(2, 9), Q15s, label=r'Q$_{15}$')
   # plt.axhline(y=0, color='k', ls=':')
+  plt.title('Continuum of values of frequency domain characteristics afforded by \n non-integer $B_u$ - generated with $b_p$=1, $A_p$=5e-02')
   plt.legend()
+  plt.xlabel('$B_u$')
+  plt.ylabel('Characteristics')
   plt.show()
 
 def fig3_2024rational():
@@ -325,62 +323,77 @@ def fig3_2024rational():
   ax1.set_ylabel('input')
   ax2.plot(outsig.timestamps, outsig.mode_t)
   ax2.set_ylabel('output')
-  fig.suptitle('Processing using non-integer TF representation, B$_u$=2.5e+00, A$_p$=5.0e-02, b$_p$=1')
+  ax2.set_xlabel('t (ms)')
+  fig.suptitle('Processing using non-integer TF representation, \n B$_u$=2.5e+00, A$_p$=5.0e-02, b$_p$=1')
   plt.show()
 
 def fig4_2024rational():
   fils1 = [Filter(Ap=Ap, bp=1, Bu=Bu) for Ap, Bu in [(0.15, 3), (0.15, 5), (0.045, 5)]]
+  legend1 = ['$A_p$=1.5e-01, $B_u$=3', '$A_p$=1.5e-01, $B_u$=5', '$A_p$=4.5e-02, $B_u$=5']
   fils2 = [Filter(Ap=0.15, bp=1, Bu=Bu) for Bu in [1.5, 2, 2.5, 3]]
+  legend2 = ['$A_p$=1.5e-01, $B_u$=1.5', '$A_p$=1.5e-01, $B_u$=2', '$A_p$=1.5e-01, $B_u$=2.5', '$A_p$=1.5e-01, $B_u$=3']
 
   fig, (ax1, ax2) = plt.subplots(2, 1, constrained_layout=True)
 
-  for fil in fils1:
+  for i in range(3):
+    fil = fils1[i]
     timestamps = [i/10 for i in range(2000)]
     _, ir = fil.impulse_response_plot(times=timestamps, show=False)
     maxir = max(ir)
-    ax1.plot(timestamps, [v/maxir for v in ir])
-  ax1.set_title('dependence of behavior of h on values of constants for integer B$_u$')
-  ax1.set_xlabel(r'h($\widetilde{t}$)')
-  ax1.set_ylabel(r'$\widetilde{t}$')
+    ax1.plot(timestamps, [v/maxir for v in ir], label=legend1[i])
+  ax1.set_title('Impulse response for integer $B_u$')
+  ax1.set_ylabel(r'h($\widetilde{t}$)')
+  ax1.set_xlabel(r'$\widetilde{t}$')
   ax1.axhline(y=0, color='k', ls=':')
+  ax1.legend(loc='right')
 
-  for fil in fils2:
+  for i in range(4):
+    fil = fils2[i]
     timestamps = [i/10 for i in range(1000)]
     _, ir = fil.impulse_response_plot(times=timestamps, show=False)
     maxir = max(ir)
-    ax2.plot(timestamps, [v/maxir for v in ir])
-  ax2.set_title('h and phase of oscillatory component for integer and half-integer B$_u$')
-  ax2.set_xlabel(r'h($\widetilde{t}$)')
-  ax2.set_ylabel(r'$\widetilde{t}$')
+    ax2.plot(timestamps, [v/maxir for v in ir], label=legend2[i])
+  ax2.set_title('Impulse response for integer and half-integer $B_u$')
+  ax2.set_ylabel(r'h($\widetilde{t}$)')
+  ax2.set_xlabel(r'$\widetilde{t}$')
   ax2.axhline(y=0, color='k', ls=':')
+  ax2.legend(loc='right')
   plt.show()
 
 def fig7_2024rational():
   fil = Filter(Ap=0.1, bp=1, Bu=1.75, cf=1)
-  sig = Signal.linear_chirp(f_init=-2, f_final=2, fs=30, num_samples=3000) # set this to be able to be ttilde
-  sig = Signal(mode='ttilde', data=sig.get_data('t'), fs=30)
+  f0 = 0
+  f1 = 1/2/np.pi
+  t1 = 120
+  chirpfunc = (lambda t: np.cos(np.pi*t*(f0*(2-t/t1) + f1*(t/t1))))
+  sig = Signal(mode='ttilde', data=chirpfunc(np.arange(-2400, 2400)/10), fs=10)
+  # sig = Signal.linear_chirp(f_init=0, f_final=1/2/np.pi, fs=10, num_samples=1200) # set this to be able to be ttilde
+  # sig = Signal(mode='ttilde', data=sig.get_data('t'), fs=10)
   sol = fil.solve(sig, method='tf')
 
   fig, axs = plt.subplots(2, 2, constrained_layout=True)
   axs[0][0].plot(sig.timestamps, sig['ttilde'])
   axs[0][1].plot(sol.timestamps, sol['ttilde'])
-  winsig, sigbound = sig.spectrogram(show=False)
+  winsig, sigbound = sig.spectrogram(mfft=200, show=False)
   winsol, solbound = sol.spectrogram(show=False)
   axs[1][0].imshow(abs(winsig[0:21][::-1]), cmap='gray', aspect='auto', extent=(0, sigbound[1], 0, sigbound[3]/5))
+  axs[1][0].set_xlabel(r'$\widetilde{t}_i$')
+  axs[1][0].set_ylabel('f/CF(x)')
   axs[1][1].imshow(abs(winsol[0:21][::-1]), cmap='gray', aspect='auto', extent=(0, solbound[1], 0, solbound[3]/5))
+  axs[1][1].set_xlabel(r'$\widetilde{t}_i$')
   plt.show()
 
 def fig8_2024rational():
   sig = Signal.from_function(mode='ttilde', func=(lambda t: t*np.cos(10*t)*np.exp(-t/2) + t**3*np.exp(-t)*np.cos(t)), fs=10, num_samples=1000)
-  pairs = [(1, 20), (5, 50), (7/8, 70), (1/5, 40)]
-  def tones(t):
-    ans = 0
-    for i in range(4):
-      fi, ti = pairs[i]
-      ans += np.exp(-((t-ti)/5)**2) * np.sin(2*np.pi*fi*t)
-    return ans
-  fs = 10
-  sig = Signal(mode='ttilde', data=[tones(t/fs) for t in range(fs*100)], fs=fs)
+  # pairs = [(1, 20), (5, 50), (7/8, 70), (1/5, 40)]
+  # def tones(t):
+  #   ans = 0
+  #   for i in range(4):
+  #     fi, ti = pairs[i]
+  #     ans += np.exp(-((t-ti)/5)**2) * np.sin(2*np.pi*fi*t)
+  #   return ans
+  # fs = 50
+  # sig = Signal(mode='ttilde', data=[tones(t/fs) for t in range(fs*100)], fs=fs)
 
   fig, (ax1, ax2) = plt.subplots(2, 1, constrained_layout=True)
   ax1.plot(sig.timestamps, sig.get_data('ttilde'))
@@ -390,10 +403,11 @@ def fig8_2024rational():
   for method in ['tf', 'ir', 'ode', 'fde']:
     sol = fil.solve(sig, method=method).get_data('ttilde')
     maxsol = max(sol)
-    ax2.plot(sig.timestamps, [v/maxsol for v in sol], ls=':', label=method) # add legend
-  ax2.set_ylabel('output') # overwritten label?
-  ax2.set_ylabel(r'$\widetilde{t}$')
-  fig.suptitle('equivalence of representations A$_p$=0.15, b$_p$=1, B$_u$=5')
+    ax2.plot(sig.timestamps, [v/maxsol for v in sol], ls=':', label=method)
+  ax2.set_ylabel('output')
+  ax2.set_xlabel(r'$\widetilde{t}$')
+  ax2.legend(loc='right')
+  fig.suptitle('Equivalence of solution methods A$_p$=0.15, b$_p$=1, B$_u$=5')
   plt.show()
 
 def fig9_2024rational():
@@ -409,23 +423,24 @@ def fig9_2024rational():
   for method in ['tf', 'ir', 'fde']:
     sol = fil.solve(sig, method=method).get_data('ttilde')
     maxsol = max(sol)
-    ax2.plot(sig.timestamps, [v/maxsol for v in sol], ls=':')
+    ax2.plot(sig.timestamps, [v/maxsol for v in sol], ls=':', label=method)
   ax2.set_ylabel('output')
-  ax2.set_ylabel(r'$\widetilde{t}$')
-  fig.suptitle('equivalence of representations A$_p$=0.04, b$_p$=1, B$_u$=1.5')
+  ax2.set_xlabel(r'$\widetilde{t}$')
+  ax2.legend(loc='right')
+  fig.suptitle('Equivalence of solution methods A$_p$=0.04, b$_p$=1, B$_u$=1.5')
   plt.show()
 
 if __name__ == "__main__":
   # fig3_2019()
-  # fig6_2019()
+  fig6_2019()
   # fig8_2019()
   # fig2_2022()
   # fig1_2024()
   # fig3_2024()
   # fig5_2024()
-  fig1_2024rational()
-  fig2_2024rational()
-  fig3_2024rational()
+  # fig1_2024rational()
+  # fig2_2024rational()
+  # fig3_2024rational()
   # fig4_2024rational()
   # fig7_2024rational()
   # fig8_2024rational()
