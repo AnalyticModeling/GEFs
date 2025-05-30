@@ -69,14 +69,14 @@ class Cochlea(FilterBank):
 
     apexmost_filter = self.filters[-1]
 
-    Ap_apex = apexmost_filter.get_params()['Ap']
-    bp_apex = apexmost_filter.get_params()['bp']
+    Ap_apex = apexmost_filter.get_consts()['Ap']
+    bp_apex = apexmost_filter.get_consts()['bp']
     self.bp_apex = bp_apex
-    Bu_apex = apexmost_filter.get_params()['Bu']
+    Bu_apex = apexmost_filter.get_consts()['Bu']
 
     allparams = [[], [], []]
     for fil in self.filters:
-      params = fil.get_params()
+      params = fil.get_consts()
       allparams[0] += [params['Ap']]
       allparams[1] += [params['bp']]
       allparams[2] += [params['Bu']]

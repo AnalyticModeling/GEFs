@@ -25,7 +25,7 @@ class FilterBank:
       Filters take
 
     Arguments:
-      topology: If specified, initializes filterbank with filters taking on params \
+      topology: If specified, initializes filterbank with filters taking on constants \
         and in the specified topology. There are two options:
         - 'parallel': all Filters take input from the same source
         - 'series': each Filter takes input from the output of the Filter before it in sequence

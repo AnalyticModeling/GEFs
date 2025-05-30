@@ -126,7 +126,7 @@ class Filter:
       raise Exception('should be impossible to get here')
 
   @classmethod
-  def multiband_params(cls, type='P', Ap=0.1, bp=1, Bu=3, gain_const=None, peak_magndb=0, betas=None, freqs=None, cf=None):
+  def multiband_consts(cls, type='P', Ap=0.1, bp=1, Bu=3, gain_const=None, peak_magndb=0, betas=None, freqs=None, cf=None):
     '''
     Specifies a multiband parameterized filter of type `type` (by summing up
     transfer functions corresponding to filters filtering for each band)
@@ -235,7 +235,7 @@ class Filter:
       return self.filter.orig_chars
     raise Exception(f'Original characteristics undefined')
 
-  def get_params(self):
+  def get_consts(self):
     '''
     Getter for dictionary of originally provided filter parameters. For instance, if Filter is \
       initialized with Filter(Ap=0.05, bp=1, Bu=3), then this function will return \

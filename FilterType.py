@@ -216,7 +216,7 @@ class Parameterized(AbstractFilter):
     if self.type == 'P':
       temp_tf = lambda s: ((s - p) * (s - p.conjugate()))**(-Bu)
     elif self.type == 'V':
-      temp_tf = (lambda s: ((s + Ap) / ((s - p) * (s - p.conjugate()))**(Bu+1)))
+      temp_tf = (lambda s: ((s + Ap) / ((s - p) * (s - p.conjugate()))**(Bu)))
 
     else:
       raise Exception('Filter type not defined')
@@ -239,7 +239,7 @@ class Parameterized(AbstractFilter):
 
   def _given_c(self, chars, n, n2, betas):
     # get closed forms?
-    params = helpers.chars2params(chars, n=n, n2=n2)
+    params = helpers.chars2consts(chars, n=n, n2=n2)
     tf, cs = self._given_p(params['Ap'], params['bp'], params['Bu'], betas)
     return [tf, params, cs]
 

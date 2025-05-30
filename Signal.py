@@ -23,6 +23,9 @@ class Signal:
       of the Signal in the time domain (specifically setting `evenlen` to `True`/`False` \
       will result in an even/odd length Signal in the time domain respectively.
 
+    'b' and 'ttilde' mode are likely rarely used in isolation, but it does \
+      make sense to use them in the context of Cochleas.
+
     Arguments:
       mode: Domain which the data is originally in. Defaults to 't'. Should be one of \
         't': time (including scaled time) \

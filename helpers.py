@@ -29,9 +29,9 @@ def match_lengths(*args, exception_msg='Input list lengths do not match'):
   else:
     return [[arg] for arg in args] # returns a list of len 1 if all inputs are scalars
 
-def chars2params(Psi, n=10, n2=3):
+def chars2consts(Psi, n=10, n2=3):
   '''
-  input/output always in normalized frequency
+  The inputs and outputs of this function are always in terms of normalized frequency.
   '''
   a = 0.418
   b = 1.02
@@ -155,11 +155,12 @@ def computedfiltercharacteristics(tfunc=None, data=None, betas=None, n=10., n2=3
 
 def sharpfiltercharacteristics(Ap, bp, Bu, n=10, n2=3):
   '''
-  Given filter characteristics, computes params with sharp-filter approximation
+  Given filter constants (Ap, bp, Bu, n, n2), computes filter characteristics with sharp-filter approximation.
   Assumes approximation holds (Filter.py checks if this is actually so)
 
-  Ap, bp, Bu: model parameters
-  n: bandwidth parameter
+  Attributes:
+    Ap, bp, Bu: model parameters
+    n, n2: bandwidth parameters (two will always be computed; the second can be ignored in the output if undesired)
   '''
   Bpeak = bp
   N = Bu/(2*np.pi*Ap)
