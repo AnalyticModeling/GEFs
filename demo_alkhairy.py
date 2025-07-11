@@ -22,7 +22,7 @@ def filter_init():
   f7.bode_plot()
 
 def filter_multiband_params():
-  f = Filter.multiband_params(Ap=0.1, bp=[0.5, 1, 1.5], Bu=[3, 5, 7], peak_magndb=1)
+  f = Filter.multiband_consts(Ap=0.1, bp=[0.5, 1, 1.5], Bu=[3, 5, 7], peak_magndb=1)
   f.bode_plot()
 
 def filter_multiband_chars():
@@ -44,7 +44,7 @@ def filter_get_orig_chars():
 def filter_get_params():
   # get from paper
   f = Filter(Ap=0.1, bp=1, Bu=3)
-  print(f.get_params())
+  print(f.get_consts())
 
 def filter_solve():
   # f = Filter(type='P', Bpeak=1, Nbeta=11.1, phiaccum=3.5)
@@ -204,21 +204,34 @@ def signal_envelope_analytic():
   plt.xlabel('Time (ms)')
   plt.show()
 
+def signal_instantaneous_phase():
+  s = Signal.linear_chirp(f_init=200, f_final=400, fs=200, num_samples=1000)
+  xaxis = [i/200 for i in range(1000)]
+  phases = s.instantaneous_phase()
+  plt.plot(xaxis, phases)
+  plt.title('Unrolled instantaneous phase')
+  plt.show()
+
+
 def filterbank_add():
-  fs = FilterBank(topology='parallel', Ap=[0.1, 0.1], bp=[0.5, 1.0], Bu=[3, 3])
+  fs = FilterBank(topology='parallel', Ap=[0.1, 0.1], bp=1, Bu=[3, 3], cf=[0.5, 1.0])
   fs.bode_plot()
   fs.add(Filter(Ap=0.1, bp=1.5, Bu=3), source=fs.filters[-1])
   fs.bode_plot()
 
 def filterbank_process_signal():
-  fs = FilterBank(topology='parallel', Ap=[0.1, 0.1, 0.1], bp=[0.5, 1.0, 1.5], Bu=[3, 3, 3])
+  fs = FilterBank(topology='parallel', Ap=[0.1, 0.1, 0.1], bp=1, Bu=[3, 3, 3], cf=[0.5, 1.0, 1.5])
   os = fs.process_signal(Signal.linear_chirp(f_init=1, f_final=10, fs=100, num_samples=200))
   for sig in os.outsignals:
     sig.plot()
 
 def filterbank_bode():
-  fs = FilterBank(topology='parallel', Ap=[0.1, 0.1, 0.1], bp=[0.5, 1.0, 1.5], Bu=[3, 3, 3])
+  fs = FilterBank(topology='parallel', Ap=[0.1, 0.05, 0.01], bp=1, Bu=[3, 3, 3], cf=[0.5, 1.0, 1.5])
   fs.bode_plot()
+
+  # fs = FilterBank(topology='parallel', Ap=[0.1, 0.1, 0.1], Bu=[3, 3, 3], fpeak=[0.5, 1.0, 1.5])
+
+  FilterBank(topology='parallel', Ap=[0.1, 0.05, 0.01], bp=[0.5, 1.0, 1.5], Bu=[3, 3, 3]).bode_plot()
 
 def outputsignals_init_kindof():
   fs = FilterBank(topology='parallel', Ap=[0.1, 0.1, 0.1], bp=[0.5, 1.0, 1.5], Bu=[3, 3, 3])
@@ -317,15 +330,16 @@ if __name__ == "__main__":
   # filter_pz()
   # filter_Qns()
   # filter_characteristic_error()
-  # signal_init()
+  signal_init()
   # signal_arith()
   # signal_at_time()
   # signal_get_data()
   # signal_resample()
   # signal_envelope_analytic()
+  # signal_instantaneous_phase()
   # filterbank_add()
   # filterbank_process_signal()
-  filterbank_bode()
+  # filterbank_bode()
   # outputsignals_init_kindof()
   # outputsignal_autocorrelates()
   # outputsignal_correlate_with()

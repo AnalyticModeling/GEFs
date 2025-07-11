@@ -71,7 +71,7 @@ def fig8_2019():
       ans += np.exp(-((t-ti)/50)**2) * np.sin(2*np.pi*fi*t)
     return ans
   sig = Signal(mode='t', data=[tones(t/100) for t in range(100000)], fs=100)
-  c.signal_response_heatmap(sig, len_xs=20)
+  c.signal_response_heatmap(sig, len_xs=50)
 
 def fig2_2022():
   fig, axs = plt.subplots(2, 2, constrained_layout=True)
@@ -432,8 +432,8 @@ def fig9_2024rational():
 
 if __name__ == "__main__":
   # fig3_2019()
-  fig6_2019()
-  # fig8_2019()
+  # fig6_2019()
+  fig8_2019()
   # fig2_2022()
   # fig1_2024()
   # fig3_2024()

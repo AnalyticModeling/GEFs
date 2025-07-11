@@ -272,6 +272,30 @@ function res = signal_envelope_analytic()
     xlabel('Time (ms)')
 end
 
+function res = signal_instantaneous_phase()
+    sig = Signal(f_init=200, f_final=400, fs=200, num_samples=1000);
+    xaxis = double(0:sig.length-1)/double(200.0);
+    phases = sig.instantaneous_phase();
+    figure
+    plot(xaxis, phases)
+    title('Unrolled instantaneous phase')
+    xlabel('Time (s)')
+end
+
+function res = signal_moving_spectral_entropy()
+    sig = Signal(f_init=200, f_final=400, fs=200, num_samples=1000);
+    Hs = sig.moving_spectral_entropy();
+    figure
+    plot(0:length(Hs)-1, Hs)
+    title('Moving spectral entropy')
+    xlabel('Sample')
+end
+
+function res = signal_spectrogram()
+    sig = Signal(f_init=200, f_final=400, fs=1000, num_samples=1000);
+    sig.spectrogram();
+end
+
 function res = filterbank_add()
     % Conversion of MATLAB 'Filter' to Python is not supported.
     % does this mean rewrite
@@ -408,6 +432,8 @@ end
 % signal_get_data()
 % signal_resample()
 % signal_envelope_analytic()
+% signal_moving_spectral_entropy()
+% signal_spectrogram()
 % filterbank_add()
 % filterbank_process_signal()
 % filterbank_bode()
