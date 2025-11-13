@@ -6,6 +6,9 @@ import helpers
 from FilterType import *
 from Signal import Signal
 
+# (2000 would be more efficient while 10000 would be more accurate )
+DEFAULT_PLOT_POINTS = 10000
+
 class Filter:
   '''
   Class for specifying filters. Actual filter is an attribute of Filter after some dispatch on arguments
@@ -46,7 +49,7 @@ class Filter:
       tf: Transfer function (function from s = j*frequency (kHz) to real data (anything but often kPa), e.g. `lambda s: 1/(1+s)`)
       coeffs: Coefficients of rational transfer function. [[1, 2], [3, 4, 5]] corresponds to the transfer function `lambda s: (1+2*s)/(3+4*s+5*s**2)`
       roots: Zeros and poles of rational transfer function. [[1], [1+2j, 1-2j]] corresponds to the transfer function `lambda s: (s-1)/((s-(1+2j))*(s-(1-2j)))`
-      type: Must be either `'P'` or `'V'`. Determines whether the filter returns functions that give pressure (`'P'`) or velocity (`'P'`)
+      type: Must be either `'P'` or `'V'`. Determines whether the filter returns functions that give pressure (`'P'`) or velocity (`'V'`)
       Ap, bp, Bu: Filter parameters. See Alkhairy (2019)
       gain_const, peak_magndb: Gain constant/peak magnitude (in dB) of Parameterized filter (and by extension, filters defined from following filter characteristics)
       Bpeak, Nbeta, ERBbeta, BWndBbeta, BWn2dBbeta, Sbeta: Filter characteristics in terms of frequencies normalized with filter's characteristic frequency (Alkhairy 2019). \
@@ -107,7 +110,7 @@ class Filter:
         maxbeta = 3*bp
       if Bpeak is not None:
         maxbeta = 3*Bpeak
-      betas = np.linspace(0.01, maxbeta, 10000)
+      betas = np.linspace(0.01, maxbeta, DEFAULT_PLOT_POINTS)
 
     # eventually refactor by making the __init__ of the three classes deal with the logic (which it actually already mostly does)
     if has_tf:
@@ -148,7 +151,7 @@ class Filter:
         raise Exception('Please provide peak frequency if freqs is specified')
       betas = [f/cf for f in freqs]
     elif betas is None:
-      betas = np.geomspace(0.01, 3*max(bp), 10000)
+      betas = np.geomspace(0.01, 3*max(bp), DEFAULT_PLOT_POINTS)
 
     constituent_filters = []
     for i in range(len(bp)):
@@ -177,7 +180,7 @@ class Filter:
     if freqs is not None:
       betas = [f/cf for f in freqs]
     elif betas is None:
-      betas = np.geomspace(0.01, 10, 10000)
+      betas = np.geomspace(0.01, 10, DEFAULT_PLOT_POINTS)
     if ERBf is not None: ERBbeta = [val/cf for val in ERBf]
     if BWndBf is not None: BWndBbeta = [val/cf for val in BWndBf]
     if BWn2dBf is not None: BWn2dBbeta = [val/cf for val in BWn2dBf]
@@ -233,7 +236,7 @@ class Filter:
     '''
     if isinstance(self.filter, Parameterized):
       return self.filter.orig_chars
-    raise Exception(f'Original characteristics undefined')
+    raise AttributeError(f'Original characteristics undefined for filter type {type(self.filter).__name__}')
 
   def get_consts(self):
     '''
@@ -243,7 +246,9 @@ class Filter:
     '''
     if isinstance(self.filter, Parameterized):
       return self.filter.params
-    raise Exception(f'Parameters undefined')
+    raise AttributeError(
+            f'Parameters are undefined for filter type {type(self.filter).__name__}. Only Parameterized filters define constants.')
+
 
   def solve(self, input, method=None, fs=None):
     '''
@@ -340,7 +345,7 @@ class Filter:
       xaxis = np.array(freqs)
       xaxis_normalized = False
     else:
-      xaxis = np.geomspace(0.1, 3*self.filter.chars['Bpeak'], 10000)
+      xaxis = np.geomspace(0.1, 3*self.filter.chars['Bpeak'], DEFAULT_PLOT_POINTS)
 
     if xaxis_normalized:
       response = self.filter.tf(1j*xaxis)
@@ -394,7 +399,7 @@ class Filter:
       xaxis = np.array(freqs)
       xaxis_normalized = False
     else:
-      xaxis = np.geomspace(0.1, 3*self.filter.chars['Bpeak'], 10000)
+      xaxis = np.geomspace(0.1, 3*self.filter.chars['Bpeak'], DEFAULT_PLOT_POINTS)
 
     if xaxis_normalized:
       response = self.filter.tf(1j*xaxis)
@@ -438,7 +443,7 @@ class Filter:
       show: `True` if plot is to be shown, `False` otherwise. Default is `True`.
     '''
     if freqs is None:
-      xaxis = np.geomspace(0.1, 2*self.filter.chars['Bpeak'], 10000)
+      xaxis = np.geomspace(0.1, 2*self.filter.chars['Bpeak'], DEFAULT_PLOT_POINTS)
     else:
       xaxis = np.array(freqs)
     normalized_magn_tf = (lambda s: self.filter.tf(s)/self.filter.tf(1j*self.filter.chars['Bpeak']))
@@ -473,7 +478,7 @@ class Filter:
       show: `True` if plot is to be shown, `False` otherwise. Default is `True`.
     '''
     if freqs is None:
-      xaxis = np.geomspace(0.1, 2*self.filter.chars['Bpeak'], 10000)
+      xaxis = np.geomspace(0.1, 2*self.filter.chars['Bpeak'], DEFAULT_PLOT_POINTS)
     else:
       xaxis = np.array(freqs)
     normalized_magn_tf = (lambda s: self.filter.tf(s)/self.filter.tf(1j*self.filter.chars['Bpeak']))
@@ -499,14 +504,14 @@ class Filter:
     Generate plot of impulse reponse of Filter. Output is [x-axis (time) data, impulse response].
 
     Attributes:
-      times: Timestamps (ms) where impulse response is evaluated. Defaults to `np.linspace(0, 100, 10000)`.
+      times: Timestamps (ms) where impulse response is evaluated. Defaults to `np.linspace(0, 100, DEFAULT_PLOT_POINTS)`.
       custom_title: Optional title of plot. Default is 'Nyquist plot'.
       show: `True` if plot is to be shown, `False` otherwise. Default is `True`.
     '''
     # find optimal num_samples and t automatically?
     # slow if tf is used to define; is there any way to be more efficient
     if times is None:
-      xaxis = np.linspace(0, 100, 10000)
+      xaxis = np.linspace(0, 100, DEFAULT_PLOT_POINTS)
     else:
       xaxis = np.array(times)
     response = self.filter.ir(xaxis)

@@ -21,7 +21,7 @@ def filter_init():
   f7 = Filter(Ap=0.1, bp=1, Bu=3)
   f7.bode_plot()
 
-def filter_multiband_params():
+def filter_multiband_consts():
   f = Filter.multiband_consts(Ap=0.1, bp=[0.5, 1, 1.5], Bu=[3, 5, 7], peak_magndb=1)
   f.bode_plot()
 
@@ -41,7 +41,7 @@ def filter_get_orig_chars():
   f = Filter(Bpeak=1, Nbeta=11.1, phiaccum=3.5)
   print(f.get_orig_chars())
 
-def filter_get_params():
+def filter_get_consts():
   # get from paper
   f = Filter(Ap=0.1, bp=1, Bu=3)
   print(f.get_consts())
@@ -315,12 +315,12 @@ def cochlea_heatmap():
 
 if __name__ == "__main__":
   # filter_init()
-  # filter_multiband_params()
+  # filter_multiband_consts()
   # filter_multiband_chars()
   # filter_get_computed_chars()
   # filter_get_computed_unnormalized_chars()
   # filter_get_orig_chars()
-  # filter_get_params()
+  # filter_get_consts()
   # filter_solve()
   # filter_bode()
   # filter_frequency_real_imag()
@@ -330,7 +330,7 @@ if __name__ == "__main__":
   # filter_pz()
   # filter_Qns()
   # filter_characteristic_error()
-  signal_init()
+   signal_init()
   # signal_arith()
   # signal_at_time()
   # signal_get_data()
