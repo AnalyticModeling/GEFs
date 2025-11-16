@@ -1,8 +1,7 @@
-from Filter import *
-from FilterBank import *
-from Signal import *
-from OutputSignals import *
-from Cochlea import *
+from src.Cochlea import *
+from src.Signal import Signal
+
+
 # import scipy.signal as spsig
 
 def filter_init():

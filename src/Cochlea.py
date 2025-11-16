@@ -1,12 +1,9 @@
 import numpy as np
-import scipy as sp
 import matplotlib.pyplot as plt
 
-from Signal import Signal
-from OutputSignals import OutputSignals
-from Filter import Filter
-from FilterBank import FilterBank
-import helpers
+from src.Filter import Filter
+from src.FilterBank import FilterBank
+from src import helpers
 
 class Cochlea(FilterBank):
   '''

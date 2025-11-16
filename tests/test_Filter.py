@@ -1,8 +1,8 @@
 import pytest
 import numpy as np
-from Filter import Filter
-from FilterType import Parameterized, Rational, Arbitrary
-from Signal import Signal
+from src.Filter import Filter
+from src.FilterType import Parameterized, Rational
+from src.Signal import Signal
 
 #======================
 # Filters Fixture

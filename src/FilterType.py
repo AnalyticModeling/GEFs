@@ -7,8 +7,8 @@ import scipy.integrate
 import scipy.optimize
 # import matplotlib.pyplot as plt
 
-# from Signal import Signal
-import helpers
+# from src.Signal import Signal
+from src import helpers
 
 class AbstractFilter():
   def __init__(self, uid, tf, ir, chars, betas):
@@ -85,7 +85,7 @@ class Arbitrary(AbstractFilter):
       siglen = len(betas)*2
       samprate = betas[-1]*2
       timestamps = np.arange(siglen)/samprate
-      irarr = [ir(t) for t in timestamps]
+      irarr = ir(timestamps)
       tfapprox = scipy.fft.rfft(irarr)
       origbetas = scipy.fft.rfftfreq(siglen, d=1/samprate)
       chars = helpers.computedfiltercharacteristics(tfunc=(lambda f: np.interp(f, origbetas, tfapprox)), betas=betas)

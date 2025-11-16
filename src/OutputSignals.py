@@ -2,7 +2,7 @@ import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
 
-from Signal import Signal
+from src.Signal import Signal
 
 class OutputSignals:
   '''

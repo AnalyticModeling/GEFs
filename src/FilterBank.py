@@ -1,7 +1,6 @@
-from Filter import Filter
-from Signal import Signal
-from OutputSignals import OutputSignals
-from RootedTree import RootedTree
+from src.Filter import Filter
+from src.OutputSignals import OutputSignals
+from src.RootedTree import RootedTree
 
 import warnings
 import numpy as np

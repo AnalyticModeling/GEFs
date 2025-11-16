@@ -1,10 +1,8 @@
-import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker
-import helpers
 
-from FilterType import *
-from Signal import Signal
+from src.FilterType import *
+from src.Signal import Signal
 
 # (2000 would be more efficient while 10000 would be more accurate )
 DEFAULT_PLOT_POINTS = 10000

@@ -1,10 +1,10 @@
-from Filter import *
-from FilterBank import *
-from Signal import *
-from OutputSignals import *
-from Cochlea import *
+from src.Filter import *
+from src.FilterBank import *
+from src.Signal import *
+from src.Cochlea import *
 import matplotlib.pyplot as plt
-import helpers
+from src import helpers
+
 
 ### for auditory physicists
 
