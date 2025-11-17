@@ -70,7 +70,7 @@ class Signal:
       self.freqstamps *= 2 * np.pi
 
     self.mean = np.mean(self.mode_t)
-    self.rms = np.mean([x**2 for x in self.mode_t])**0.5
+    self.rms = np.sqrt(np.mean(self.mode_t**2))
 
     self.analytic = scipy.signal.hilbert(self.mode_t)
     self.hilbert = np.array([x.real for x in self.analytic])
@@ -166,7 +166,7 @@ class Signal:
   def _pad_time_series_to_same_length(self, other): # should be private
     if self.length >= len(other):
       self_t = self.mode_t
-      other_t = np.append(other, [0 for _ in range(self.length-len(other))]).tolist()
+      other_t = np.pad(other, (0, self.length - len(other)))
     else:
       self_t = np.append(self.mode_t, [0 for _ in range(len(other)-self.length)])
       other_t = other
