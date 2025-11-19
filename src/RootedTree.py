@@ -8,9 +8,9 @@ class RootedTree:
     if source_id not in range(self.num_nonroot+1): raise Exception()
     self.num_nonroot += 1
     node_id = self.num_nonroot
-    self.parent += [source_id]
-    self.child += [[]]
-    self.child[source_id] += [node_id]
+    self.parent.append(source_id)
+    self.child.append([])
+    self.child[source_id].append(node_id)
 
   def add_parallel(self, n, source_id=0):
     if source_id not in range(self.num_nonroot+1): raise Exception()
