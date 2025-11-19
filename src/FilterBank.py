@@ -60,7 +60,8 @@ class FilterBank:
         if vec_lens[0] == 0:
           warnings.warn('Len 0 input array provided, meaning 0 filters created')
         for i in range(vec_lens[0]):
-          self.filters += [Filter(**scalar_args, **{k:vector_args[k][i] for k in vector_args})]
+            new_filter = Filter(**scalar_args, **{k: vector_args[k][i] for k in vector_args})
+            self.filters.append(new_filter)
     # self.filters is now fully defined
 
     self.graph = RootedTree()
@@ -130,9 +131,10 @@ class FilterBank:
       source: Source Filter
       source_uide: UID of source Filter. Default is -1
     '''
-    self.filters += [filter]
+    self.filters.append(filter)
     graph_id = len(self.filters)
     self._uid2graphid[filter.uid] = graph_id
+    self._graphid2uid[graph_id] = filter.uid
     if source is not None:
       graph_parentid = self._uid2graphid[source.uid]
     elif source_uid is not None:

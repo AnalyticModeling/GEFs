@@ -313,7 +313,7 @@ def cochlea_heatmap():
   print(len(ans))
 
 if __name__ == "__main__":
-  # filter_init()
+   filter_init()
   # filter_multiband_consts()
   # filter_multiband_chars()
   # filter_get_computed_chars()
@@ -329,8 +329,8 @@ if __name__ == "__main__":
   # filter_pz()
   # filter_Qns()
   # filter_characteristic_error()
-   # signal_init()
-   signal_arith()
+  # signal_init()
+  # signal_arith()
   # signal_at_time()
   # signal_get_data()
   # signal_resample()
