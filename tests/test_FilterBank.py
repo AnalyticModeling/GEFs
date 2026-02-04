@@ -1,7 +1,7 @@
 import pytest
-from src.Filter import Filter
-from src.Signal import Signal
-from src.FilterBank import FilterBank
+from src.GEFs_core.Filter import Filter
+from src.GEFs_core.Signal import Signal
+from src.GEFs_core.FilterBank import FilterBank
 
 #======================
 # Filter Fixture

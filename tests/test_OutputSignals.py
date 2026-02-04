@@ -1,8 +1,7 @@
 import pytest
 import numpy as np
-from unittest.mock import patch  # For mocking matplotlib
-from src.Signal import Signal
-from src.OutputSignals import OutputSignals
+from src.GEFs_core.Signal import Signal
+from src.GEFs_core.OutputSignals import OutputSignals
 
 #======================
 # Signals Fixture

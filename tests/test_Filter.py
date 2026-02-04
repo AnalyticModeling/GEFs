@@ -1,8 +1,8 @@
 import pytest
 import numpy as np
-from src.Filter import Filter
-from src.FilterType import Parameterized, Rational
-from src.Signal import Signal
+from src.GEFs_core.Filter import Filter
+from src.GEFs_core.FilterType import Parameterized, Rational
+from src.GEFs_core.Signal import Signal
 
 #======================
 # Filters Fixture

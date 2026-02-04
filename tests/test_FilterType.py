@@ -1,9 +1,9 @@
 import pytest
 import numpy as np
-from src.Filter import Filter
-from src.FilterType import AbstractFilter, Arbitrary, Rational, Parameterized
-from src.Signal import Signal
-from src.helpers import chars2consts, sharpfiltercharacteristics
+from src.GEFs_core.Filter import Filter
+from src.GEFs_core.FilterType import AbstractFilter, Arbitrary, Rational, Parameterized
+from src.GEFs_core.Signal import Signal
+from src.GEFs_core.helpers import chars2consts, sharpfiltercharacteristics
 
 #======================
 # Filters Fixture

@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 import scipy.fft
-from src.Signal import Signal
+from src.GEFs_core.Signal import Signal
 
 #======================
 # Signal Fixture

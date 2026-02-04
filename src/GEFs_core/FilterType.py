@@ -8,7 +8,8 @@ import scipy.optimize
 # import matplotlib.pyplot as plt
 
 # from src.Signal import Signal
-from src import helpers
+from src.GEFs_core import helpers
+
 
 class AbstractFilter():
   def __init__(self, uid, tf, ir, chars, betas):

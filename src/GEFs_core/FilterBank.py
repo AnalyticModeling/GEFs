@@ -1,6 +1,6 @@
-from src.Filter import Filter
-from src.OutputSignals import OutputSignals
-from src.RootedTree import RootedTree
+from src.GEFs_core.Filter import Filter
+from src.GEFs_core.OutputSignals import OutputSignals
+from src.GEFs_core.RootedTree import RootedTree
 
 import warnings
 import numpy as np

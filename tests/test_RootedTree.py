@@ -1,5 +1,5 @@
 import pytest
-from src.RootedTree import RootedTree
+from src.GEFs_core.RootedTree import RootedTree
 
 #======================
 # Code Tests

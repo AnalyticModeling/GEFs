@@ -1,0 +1,25 @@
+[build-system]
+# tools required to build the package
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build-meta"
+
+[project]
+# the name that will be used to import the library ( import GEFs_core)
+name = "GEFs_core"
+version = "0.1.0"
+description = "Core GEFs utilities for signal processing."
+readme = "README.md"
+requires-python = "<=3.12" #3.12 is the minimum supported Python version
+
+# Specify dependencies. Pip will install these automatically.
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "pytest"
+]
+
+# This tells setuptools where to find the code
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["GEFs_core*"]
