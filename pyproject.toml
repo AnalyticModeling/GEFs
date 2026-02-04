@@ -9,7 +9,7 @@ name = "GEFs_core"
 version = "0.1.0"
 description = "Core GEFs utilities for signal processing."
 readme = "README.md"
-requires-python = "<=3.12" #3.12 is the minimum supported Python version
+requires-python = ">=3.9"
 
 # Specify dependencies. Pip will install these automatically.
 dependencies = [
