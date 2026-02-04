@@ -1,7 +1,7 @@
 [build-system]
 # tools required to build the package
 requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build-meta"
+build-backend = "setuptools.build_meta"
 
 [project]
 # the name that will be used to import the library ( import GEFs_core)
