@@ -34,7 +34,7 @@ function res = filter_init()
     f7.bode_plot();
 end
 
-function res = filter_multiband_params()
+function res = filter_multiband_consts()
     f = Filter(Ap=0.1, bp=[0.5, 1, 1.5], Bu=[3, 5, 7], peak_magndb=1);
     f.bode_plot();
 end
@@ -59,9 +59,9 @@ function res = filter_get_orig_chars()
     res = f.get_orig_chars();
 end
 
-function res = filter_get_params()
+function res = filter_get_consts()
     f = Filter(Ap=0.1, bp=1, Bu=3);
-    res = f.get_params();
+    res = f.get_consts();
 end
 
 function res = filter_solve()
@@ -411,12 +411,12 @@ end
 
 
 % filter_init()
-% filter_multiband_params()
+% filter_multiband_consts()
 % filter_multiband_chars()
 % filter_get_computed_chars()
 % filter_get_computed_unnormalized_chars()
 % filter_get_orig_chars()
-% filter_get_params()
+% filter_get_consts()
 % filter_solve()
 % filter_bode()
 % filter_frequency_real_imag()

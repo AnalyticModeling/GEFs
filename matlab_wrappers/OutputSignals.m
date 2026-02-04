@@ -67,7 +67,8 @@ classdef OutputSignals
             xlim = int32(obj.PyOutputSignals.signal_length);
             for i = 1:obj.numSignals
                 nexttile
-                plot(0:xlim-1, autocorrelate(obj.outSignals(i)))
+                CorrData = autocorrelate(obj.outSignals(i));
+                plot(0:xlim-1, CorrData)
                 ylabel(sprintf('Signal %u', obj.outSignals(i).PySignal.uid))
             end
             sgtitle(custom_title)

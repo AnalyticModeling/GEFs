@@ -124,9 +124,10 @@ classdef FilterBank
 
                 nexttile
                 for i = 1:obj.numFilters
-                    freqs = allFilterData{i}{1};
-                    magns = allFilterData{i}{2};
-                    uid = allFilterData{i}{4};
+                    currentFilter = allFilterData{i};
+                    freqs = double(currentFilter{1});
+                    magns = double(currentFilter{2});
+                    uid = currentFilter{4};
                     semilogx(freqs, magns)
                     hold on
                 end
@@ -136,9 +137,10 @@ classdef FilterBank
 
                 nexttile
                 for i = 1:obj.numFilters
-                    freqs = allFilterData{i}{1};
-                    phases = allFilterData{i}{3};
-                    uid = allFilterData{i}{4};
+                    currentFilter = allFilterData{i};
+                    freqs = currentFilter{1};
+                    phases = currentFilter{3};
+                    uid = currentFilter{4};
                     semilogx(freqs, phases)
                     hold on
                 end

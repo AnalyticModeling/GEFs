@@ -28,19 +28,19 @@ classdef Signal
                     else
                         sample_points = options.fs*(0:(options.num_samples-1))/options.num_samples;
                     end
-                    pySig = py.Signal.Signal(mode=options.mode, data=options.func(sample_points), fs=options.fs, evenlen=options.evenlen);
+                    pySig = py.Signal.Signal(mode=options.mode, data=py.list(options.func(sample_points)), fs=options.fs, evenlen=options.evenlen);
                 elseif ~ismissing(options.f_init) || ~ismissing(options.w_init)
                     pySig = py.Signal.Signal.linear_chirp(f_init=options.f_init, w_init=options.w_init, f_final=options.f_final, w_final=options.w_final, fs=options.fs, num_samples=options.num_samples);
                 elseif ~ismissing(options.freq_func)
                     % freq_func isn't like func?
                     if ~ismissing(options.freqs)
-                        freqs = options.freqs;
+                        freqs = py.list(options.freqs);
                     else
                         freqs = 2 * pi * options.freq_func((0:(options.num_samples-1))/options.fs);
                     end
                     pySig = py.Signal.Signal.from_instantaneous_frequency(freqs=freqs, init_phase=options.init_phase, fs=options.fs, num_samples=options.num_samples);
                 else
-                    pySig = py.Signal.Signal(mode=options.mode, data=options.data, fs=options.fs);
+                    pySig = py.Signal.Signal(mode=options.mode, data=py.list(options.data), fs=options.fs);
                 end
             else
                 pySig = options.pysignal;
@@ -134,7 +134,7 @@ classdef Signal
             if nargin == 1
                 window_len = 9;
             end
-            moveH = double(obj.PySignal.moving_spectral_entropy(window_len=window_len));
+            moveH = double(obj.PySignal.moving_spectral_entropy(window_len=int32(window_len)));
         end
         function [sfft, bounds] = spectrogram(obj, options)
             arguments
@@ -172,11 +172,14 @@ classdef Signal
                 options.mode = 't'
                 options.custom_title = string(missing)
             end
+            t_data = double(obj.PySignal.timestamps);
             if (options.mode == "t") || (options.mode == "ttilde")
-                plot(obj.PySignal.timestamps, obj.PySignal.mode_t)
+                y_data = double(obj.PySignal.mode_t);
+                plot(t_data, y_data)
                 xlabel('Time (ms)')
             else
-                plot(obj.PySignal.timestamps, obj.PySignal.mode_f)
+                y_data = double(obj.PySignal.mode_f);
+                plot(t_data, y_data)
                 xlabel('Normalized time')
             end
             title(options.custom_title)

@@ -5,7 +5,7 @@ classdef Filter
     methods
         function obj = Filter(options)
             % please use cell arrays for coeffs and roots
-            % multiband_params requires one of Ap, bu, Bp to be long (just gain_const or peak_magndb doesn't cut it)
+            % multiband_consts requires one of Ap, bu, Bp to be long (just gain_const or peak_magndb doesn't cut it)
             arguments
                 options.ir = string(missing)
                 options.tf = string(missing)
@@ -41,7 +41,7 @@ classdef Filter
             end
             if ismissing(options.pyfilter)
                 if (length(options.Ap) ~= 1) || (length(options.bp) ~= 1) || (length(options.Bu) ~= 1)
-                     pyFil = py.Filter.Filter.multiband_params(type=options.type, ...
+                     pyFil = py.Filter.Filter.multiband_consts(type=options.type, ...
                         Ap=options.Ap, ...
                         bp=options.bp, ...
                         Bu=options.Bu, ...
@@ -126,8 +126,8 @@ classdef Filter
         function cs = get_orig_chars(obj)
             cs = struct(obj.PyFilter.get_orig_chars());
         end
-        function cs = get_params(obj)
-            cs = struct(obj.PyFilter.get_params());
+        function cs = get_consts(obj)
+            cs = struct(obj.PyFilter.get_consts());
         end
         function cs = solve(obj, sig, options)
             arguments
@@ -277,7 +277,7 @@ classdef Filter
             if options.show
                 if ismissing(options.custom_title)
                     try
-                        Bu = obj.get_params().Bu;
+                        Bu = obj.get_consts().Bu;
                         if abs(Bu-round(Bu))>1e-10
                             custom_title = 'Pole-zero plot (of base filter)';
                         else
@@ -330,12 +330,8 @@ classdef Filter
             all_output = obj.PyFilter.characteristic_error(show=false);
             errorStruct = struct(all_output);
             fields = fieldnames(errorStruct);
-            errorableChars = repmat('', length(fields));
-            errors = zeros(1, length(fields));
-            for idx = 1:length(fields)
-                errorableChars{idx} = fields{idx};
-                errors(idx) = errorStruct.(fields{idx});
-            end
+            errorableChars = fieldnames(errorStruct);   % Gets all names as a cell array instantly
+            errors = structfun(@double, errorStruct)';   % Applies 'double' to every field at once
             if options.show
                 bar(errorableChars, errors)
                 title(options.custom_title)
