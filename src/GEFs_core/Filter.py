@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import matplotlib.ticker
 
-from src.GEFs_core.FilterType import *
-from src.GEFs_core.Signal import Signal
+from GEFs_core.FilterType import *
+from GEFs_core.Signal import Signal
 
 # (2000 would be more efficient while 10000 would be more accurate )
 DEFAULT_PLOT_POINTS = 10000

@@ -1,9 +1,9 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-from src.GEFs_core.Filter import Filter
-from src.GEFs_core.FilterBank import FilterBank
-from src.GEFs_core.Signal import Signal
+from GEFs_core.Filter import Filter
+from GEFs_core.FilterBank import FilterBank
+from GEFs_core.Signal import Signal
 
 
 # import scipy.signal as spsig

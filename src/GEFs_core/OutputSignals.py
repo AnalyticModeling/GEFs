@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-from src.GEFs_core.Signal import Signal
+from GEFs_core.Signal import Signal
 
 class OutputSignals:
   '''

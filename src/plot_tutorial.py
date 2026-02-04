@@ -1,8 +1,8 @@
-from src.GEFs_core.Filter import *
-from src.GEFs_core.FilterBank import *
-from src.GEFs_core.Signal import *
+from GEFs_core.Filter import *
+from GEFs_core.FilterBank import *
+from GEFs_core.Signal import *
 import matplotlib.pyplot as plt
-from src.GEFs_core import helpers
+from GEFs_core import helpers
 
 def fig1_2024():
   Ap = 0.055

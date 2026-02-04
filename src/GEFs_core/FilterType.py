@@ -7,8 +7,8 @@ import scipy.integrate
 import scipy.optimize
 # import matplotlib.pyplot as plt
 
-# from src.Signal import Signal
-from src.GEFs_core import helpers
+# from Signal import Signal
+from GEFs_core import helpers
 
 
 class AbstractFilter():
