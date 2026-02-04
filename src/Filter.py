@@ -518,6 +518,7 @@ class Filter:
       plt.plot(xaxis, response)
       plt.title(custom_title)
       plt.xlabel('Time (s)')
+      plt.ylabel('Impulse Response')
       plt.show()
     return [xaxis, response]
 

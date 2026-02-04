@@ -8,6 +8,9 @@ def mag2db(x):
   return 20*np.log10(x)
 
 def match_lengths(*args, exception_msg='Input list lengths do not match'):
+  """
+    Checks inputs for list length consistency
+  """
   arg_copy = []
   list_exist = False
   list_len = -1
@@ -20,11 +23,11 @@ def match_lengths(*args, exception_msg='Input list lengths do not match'):
   if list_exist:
     for arg in args:
       if np.ndim(arg) == 0:
-        arg_copy += [[arg for _ in range(list_len)]]
+        arg_copy.append([arg for _ in range(list_len)])
       elif len(arg) != list_len:
         raise Exception(exception_msg)
       else:
-        arg_copy += [arg]
+        arg_copy.append(arg)
     return arg_copy
   else:
     return [[arg] for arg in args] # returns a list of len 1 if all inputs are scalars
@@ -126,13 +129,14 @@ def computedfiltercharacteristics(tfunc=None, data=None, betas=None, n=10., n2=3
       BWndBbeta_index = betas[Bpeak_index+1+find_nearest_index(magns_db[Bpeak_index+1:], magns_db[Bpeak_index]-num)] \
                         - betas[find_nearest_index(magns_db[:Bpeak_index], magns_db[Bpeak_index]-num)]
     return BWndBbeta_index
+  eps = np.finfo(float).eps # “epsilon” (Epsilon, the smallest stable number the computer can use) to the Bandwidth value before division. This guarantees the denominator is never zero
   BWndBbeta = get_BWndBbeta(n)
-  Qn = Bpeak/BWndBbeta
+  Qn = Bpeak/(BWndBbeta + eps)
   BWn2dBbeta = get_BWndBbeta(n2)
-  Qn2 = Bpeak/BWn2dBbeta
+  Qn2 = Bpeak/Bpeak / (BWn2dBbeta + eps)
 
   ERBbeta = np.trapz((magns_raw/magns_raw[Bpeak_index])**2, x=betas)
-  Qerb = Bpeak/ERBbeta
+  Qerb = Bpeak/(ERBbeta + eps)
 
   Sbeta = -np.gradient(np.gradient(magns_db, betas), betas)[Bpeak_index]
 

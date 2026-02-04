@@ -452,6 +452,7 @@ class Signal:
     if mode is None:
       if self.mode in ['t', 'f', 'w']:
         mode = 't'
+        # mode = self.mode -> so it reach the 'f' and 'b' conditions
       else:
         mode = 'ttilde'
     d = self.get_data(mode=mode)
@@ -467,6 +468,7 @@ class Signal:
     elif mode == 'b' or mode == 'beta':
       plt.plot(scipy.fft.rfftfreq(len(self.mode_t), 1/self.fs), [abs(v) for v in d])
       plt.xlabel('Magnitude of normalized frequency')
+    plt.ylabel('Signal')
 
     if custom_title is not None:
       plt.title(custom_title)
