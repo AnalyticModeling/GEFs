@@ -450,6 +450,7 @@ class Signal:
       custom_title: Optional title of plot. NOTE: Default is no title.
     '''
     if mode is None:
+      # if the signal was initialized in 't','f','w' -> the default  plot mode is in t. if the signal was initialized in 'b','ttilde' then the default plot mode is ttilde
       if self.mode in ['t', 'f', 'w']:
         mode = 't'
         # mode = self.mode -> so it reach the 'f' and 'b' conditions

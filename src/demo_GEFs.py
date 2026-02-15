@@ -11,19 +11,16 @@ from GEFs_core.Signal import Signal
 def filter_init():
   f1 = Filter(tf=(lambda s: 1/(1+s+s**2)))
   f1.bode_plot()
-  #error
-  f2 = Filter(ir=(lambda t: t*np.exp(-t)*np.sin(t)))
+  f2 = Filter(coeffs=[[1], [1, 1, 1]])
   f2.bode_plot()
-  f3 = Filter(coeffs=[[1], [1, 1, 1]])
+  f3 = Filter(roots=[[1], [1+2j, 1-2j]])
   f3.bode_plot()
-  f4 = Filter(roots=[[1], [1+2j, 1-2j]])
+  f4 = Filter(Bpeak=1.5, Nbeta=11.1, phiaccum=3.5)
   f4.bode_plot()
-  f5 = Filter(Bpeak=1.5, Nbeta=11.1, phiaccum=3.5)
+  f5 = Filter(Bpeak=1.5, Nf=1.11, phiaccum=3.5, cf=10)
   f5.bode_plot()
-  f6 = Filter(Bpeak=1.5, Nf=1.11, phiaccum=3.5, cf=10)
+  f6 = Filter(Ap=0.1, bp=1, Bu=3)
   f6.bode_plot()
-  f7 = Filter(Ap=0.1, bp=1, Bu=3)
-  f7.bode_plot()
 
 def filter_multiband_consts():
   f = Filter.multiband_consts(Ap=0.1, bp=[0.5, 1, 1.5], Bu=[3, 5, 7], peak_magndb=1)
@@ -237,7 +234,7 @@ def signal_instantaneous_phase():
   plt.plot(xaxis, phases)
   plt.xlabel('Time (s)')
   plt.ylabel('Phase (rad)')
-  plt.title('Unrolled Instantaneous Phase of Linear Chirp')
+  plt.title('Instantaneous Phase of Linear Chirp')
   plt.show()
 
 
@@ -334,8 +331,7 @@ def outputsignals_correlogram():
 
 if __name__ == "__main__":
 
-  ##### filter_init()
-
+   filter_init()
   # filter_multiband_consts()
   # filter_multiband_chars()
   # filter_get_computed_chars()
@@ -351,7 +347,7 @@ if __name__ == "__main__":
   # filter_pz()
   # filter_Qns()
   # filter_characteristic_error()
-   signal_init()
+  # signal_init()
   # signal_arith()
   # signal_at_time()
   # signal_get_data()
@@ -362,8 +358,6 @@ if __name__ == "__main__":
   # filterbank_process_signal()
   # filterbank_bode()
   # outputsignals_init_kindof()
-
-  ##### outputsignal_autocorrelates()
-  ##### outputsignal_correlate_with()
-
+  # outputsignal_autocorrelates()
+  # outputsignal_correlate_with()
   # outputsignals_correlogram()

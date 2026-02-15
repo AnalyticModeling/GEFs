@@ -1,6 +1,31 @@
-addpath matlab_wrappers
-
+%% --- SETUP ---
 initialRun
+% Getting the location of this script
+[currentDir, ~, ~] = fileparts(mfilename('fullpath'));
+% Getting MATLAB wrappers path
+wrapperPath = fullfile(currentDir, 'GEFs_core', 'matlab_wrappers');
+if exist(wrapperPath, 'dir')
+    addpath(wrapperPath);
+else
+    error('Cannot find wrappers at: %s. Check your folder structure!', wrapperPath);
+end
+% Linking to the Python Virtual Environment (.venv)
+% It is located 2 levels up from this script (GEFs/src/GEFs_core)
+projectRoot = fileparts(fileparts(currentDir));
+venvPath = fullfile(projectRoot, '.venv', 'Scripts', 'python.exe');
+
+if exist(venvPath, 'file')
+    if isempty(pyenv().Executable) || ~contains(pyenv().Executable, '.venv')
+        pyenv('Version', venvPath, 'ExecutionMode', 'OutOfProcess');
+    end
+end
+% 4. Adding the GEFs_core folder to Python search path
+pythonSrc = fullfile(currentDir, 'GEFs_core');
+if count(py.sys.path, pythonSrc) == 0
+    insert(py.sys.path, int32(0), pythonSrc);
+end
+
+%//Functions//
 
 function res = filter_init()
     tf1 = pyrun('pytf = (lambda s: 1/(1+s+s**2))', 'pytf');
@@ -8,30 +33,25 @@ function res = filter_init()
     figure
     f1.bode_plot();
 
-    % ir1 = pyrun('pyir = (lambda t: t*numpy.exp(-t)*numpy.sin(t))', 'pyir'); % -> currently invalid in MATLAB
-    % f2 = Filter(ir=ir1);
-    % figure
-    % f2.bode_plot();
+    f2 = Filter(coeffs={{1}, {1, 1, 1}});
+    figure
+    f2.bode_plot();
 
-    f3 = Filter(coeffs={{1}, {1, 1, 1}});
+    f3 = Filter(roots={{1}, {1+2j, 1-2j}});
     figure
     f3.bode_plot();
 
-    f4 = Filter(roots={{1}, {1+2j, 1-2j}});
+    f4 = Filter(Bpeak=1.5, Nbeta=11.1, phiaccum=3.5);
     figure
     f4.bode_plot();
 
-    f5 = Filter(Bpeak=1.5, Nbeta=11.1, phiaccum=3.5);
+    f5 = Filter(Bpeak=1.5, Nf=1.11, phiaccum=3.5, cf=10);
     figure
     f5.bode_plot();
 
-    f6 = Filter(Bpeak=1.5, Nf=1.11, phiaccum=3.5, cf=10);
+    f6 = Filter(Ap=0.1, bp=1, Bu=3);
     figure
     f6.bode_plot();
-
-    f7 = Filter(Ap=0.1, bp=1, Bu=3);
-    figure
-    f7.bode_plot();
 end
 
 function res = filter_multiband_consts()
@@ -356,14 +376,14 @@ function res = outputsignals_correlogram()
     os.correlogram()
 end
 
-% filter_init()
+ filter_init()
 % filter_multiband_consts()
 % filter_multiband_chars()
 % filter_get_computed_chars()
 % filter_get_computed_unnormalized_chars()
 % filter_get_orig_chars()
 % filter_get_consts()
-% filter_solve()
+% filter_solve()  % the second figure is empty
 % filter_bode()
 % filter_frequency_real_imag()
 % filter_nichols()
@@ -385,8 +405,8 @@ end
 % filterbank_bode()
 % outputsignals_init_kindof()
 % outputsignals_autocorrelates()
-% outputsignal_correlate_with()
-outputsignals_correlogram()
+% outputsignals_correlate_with()
+% outputsignals_correlogram()
 
 function res = filter_test()
     % gcf;

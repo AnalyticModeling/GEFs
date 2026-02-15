@@ -72,8 +72,11 @@ class OutputSignals:
           subgraph.set_xticks([])
 
     for i in range(n-1):
-      axs[-1][i].set_xlabel(f'Signal {self.outsignals[i].uid}')
-      axs[i][0].set_ylabel(f'Signal {self.outsignals[i+1].uid}')
+        x_label_id = self._uid2graphid[self.outsignals[i].uid]
+        y_label_id = self._uid2graphid[self.outsignals[i + 1].uid]
+
+        axs[-1][i].set_xlabel(f'Signal {x_label_id}')
+        axs[i][0].set_ylabel(f'Signal {y_label_id}')
 
     fig.subplots_adjust(wspace=0, hspace=0)
     fig.suptitle(custom_title)
@@ -93,7 +96,7 @@ class OutputSignals:
     for i in range(n):
       subgraph = axs[i]
       subgraph.plot(range(self.signal_length), self.outsignals[i].autocorrelate())
-      subgraph.set_ylabel(f'Signal {self.outsignals[i].uid}')
+      subgraph.set_ylabel(f'Signal {self._uid2graphid[self.outsignals[i].uid]}')
 
     fig.subplots_adjust(wspace=0, hspace=0)
     fig.suptitle(custom_title)
@@ -113,7 +116,7 @@ class OutputSignals:
     for i in range(n):
       subgraph = axs[i]
       subgraph.plot(range(-self.signal_length+1, self.signal_length), signal @ self.outsignals[i])
-      subgraph.set_ylabel(f'Signal {self.outsignals[i].uid}')
+      subgraph.set_ylabel(f'Signal {self._uid2graphid[self.outsignals[i].uid]}')
 
     fig.subplots_adjust(wspace=0, hspace=0)
     fig.suptitle(custom_title)
