@@ -1,31 +1,4 @@
-%% --- SETUP ---
 initialRun
-% Getting the location of this script
-[currentDir, ~, ~] = fileparts(mfilename('fullpath'));
-% Getting MATLAB wrappers path
-wrapperPath = fullfile(currentDir, 'GEFs_core', 'matlab_wrappers');
-if exist(wrapperPath, 'dir')
-    addpath(wrapperPath);
-else
-    error('Cannot find wrappers at: %s. Check your folder structure!', wrapperPath);
-end
-% Linking to the Python Virtual Environment (.venv)
-% It is located 2 levels up from this script (GEFs/src/GEFs_core)
-projectRoot = fileparts(fileparts(currentDir));
-venvPath = fullfile(projectRoot, '.venv', 'Scripts', 'python.exe');
-
-if exist(venvPath, 'file')
-    if isempty(pyenv().Executable) || ~contains(pyenv().Executable, '.venv')
-        pyenv('Version', venvPath, 'ExecutionMode', 'OutOfProcess');
-    end
-end
-% 4. Adding the GEFs_core folder to Python search path
-pythonSrc = fullfile(currentDir, 'GEFs_core');
-if count(py.sys.path, pythonSrc) == 0
-    insert(py.sys.path, int32(0), pythonSrc);
-end
-
-%//Functions//
 
 function res = filter_init()
     tf1 = pyrun('pytf = (lambda s: 1/(1+s+s**2))', 'pytf');

@@ -1,30 +1,4 @@
-%% --- PORTABLE SETUP (GEFs REPO) ---
-% Getting the location of this script
-[currentDir, ~, ~] = fileparts(mfilename('fullpath'));
-% Getting MATLAB wrappers path
-wrapperPath = fullfile(currentDir, 'GEFs_core', 'matlab_wrappers');
-if exist(wrapperPath, 'dir')
-    addpath(wrapperPath);
-else
-    error('Cannot find wrappers at: %s. Check your folder structure!', wrapperPath);
-end
-% Linking to the Python Virtual Environment (.venv)
-% It is located 2 levels up from this script (GEFs/src/GEFs_core)
-projectRoot = fileparts(fileparts(currentDir));
-venvPath = fullfile(projectRoot, '.venv', 'Scripts', 'python.exe');
-
-if exist(venvPath, 'file')
-    if isempty(pyenv().Executable) || ~contains(pyenv().Executable, '.venv')
-        pyenv('Version', venvPath, 'ExecutionMode', 'OutOfProcess');
-    end
-end
-% 4. Adding the GEFs_core folder to Python search path
-pythonSrc = fullfile(currentDir, 'GEFs_core');
-if count(py.sys.path, pythonSrc) == 0
-    insert(py.sys.path, int32(0), pythonSrc);
-end
-
-%//Functions//
+initialRun
 
 function db = mag2db(x)
     db = 20*log10(x);
@@ -245,14 +219,14 @@ fig1_2024rat()
 figure
 fig2_2024rat()
 figure
-fig3_2024rat()
-figure
+% fig3_2024rat()
+% figure
 fig4_2024rat()
 % fig7_2024rat() % broken
 figure
-fig8_2024rat()
-figure
-fig9_2024rat()
+% fig8_2024rat()
+% figure
+% fig9_2024rat()
 
 % fil.PyFilter.filter.tf applied to an array errors. Redefine inside MATLAB
 % objects? Force user to pass in numpy arrays
