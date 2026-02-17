@@ -1,5 +1,5 @@
 # GEFs
-The toolbox has been primarily developed for filter design and signal processing and analysis purposes as well as for the scientific study of the auditory system pertaining to the cochlea and perceptual studies. The toolbox has been developed such that users with interests and backgrounds in only one of the aforementioned fields may use it without concerning themselves with other functionalities.
+The toolbox has been primarily developed for filter design and signal processing and analysis purposes abd it can be used for various applications such as the scientific study of the auditory system pertaining to the cochlea and perceptual studies. The toolbox has been developed such that users with interests and backgrounds in only one of the aforementioned fields may use it without concerning themselves with other functionalities.
 
 ## Capabilities for Filter Design and Filtering
 This toolset includes functionalities for filter construction and signal processing using filters for arbitrary filters and signals. It also includes filter design functionalities specific to a class of bandpass filters (referred to as GEFs) and related classes of bandpass filters, multiband filters, and filterbanks. GEFs are bandpass LTI filters with a pair of poles repeated $B_u$ times.
@@ -10,42 +10,62 @@ More details are provided later as well as in the documentation, but in summary,
 * Parameterized filters may be constructed using the parameterized model in [1] as well as user-inputted constants.
 * Multiband filters can be constructed by providing lists of constants or filter characteristics.
 * Filterbanks can be constructed by inputting lists of constants or filter characteristics *or* filters. Arbitrary topologies can be implemented, but default options for parallel and series are providd.
-* Cochleas are instances of filterbanks with various additional cochlear characteristics attached.
-* Signals are treated as distinct objects and can be fed into filters/filterbanks/cochleas.
+* Signals are treated as distinct objects and can be fed into filters/filterbanks.
 * Everything has various plotting options, especially base filters and signals.
 
 ## Design of GEFs
 * GEFs, also known as Generalized Auditory Filters (GAFs), allow filter design throguh specifying filter characeristics such as peak frequencies, quality factors, and group delays. This is as opposed to filter design based on the complex frequency response or its magnitudes or amplitude over a length of frequencies. This can be extended to filterbanks
 * Though transfer functions frequently have integer orders, GEFs can be have rational exponents, better approximating a continuum of filter characteristics and allowing for finer control of said characteristics.
 
-## Capabilities for Studying Auditory Physics and Cochlear Mechanics
-* Variables of the cochlear model include (1) response variables (which are related to the filters) that may in principle be observed in some species: differential pressure across the OoC, and OoC velocity, as well (2) mechanistic variables which contain information how the model works: the differential pressure wavenumber, and the effective impedance of the OoC.
-* A user may specify a species (human or chinchilla) or model constants that vary slowly along the length of the cochlea to generate the mechanistic variables and functional response variables.
-* A user may study the dependence of mechanistic variable behavior on observed response characteristics.
-* Alternatively, given reported response characteristics such as quality factors and group delays, the methods can be used to estimate the underlying mechanistic variables which encode properties of interest to auditory physicists such as negative effective damping. This feature is related to the filter design methods mentioned above where desired values for characteristics are provided to design filters (which map onto to response variables in the cochlear model).
-* A user may be interested in the model variables from a traveling wave perspective (as a function of $x$ for a constant $\omega$) or from a transfer function perspective (as a function of $\omega$ for a constant $x$). The two perspectives are tied together via an assumption of local scaling symmetry of the wavenumber.
-* _Key Assumptions:_ The cochlear model is related to the filterbank and assumes an uncoiled box model of the cochlea with a single partition for the Organ of Corti (OoC). The model is developed based on observations from the response of the active mammalian cochlea to low stimulus levels (and hence linear). The derivation also assumes local scaling symmetry of the wavenumber - i.e. the model constants or filter characteristics such as quality factors vary slowly along the length of the cochlea. Additionally, the scaling factor due to the long-wave region (which is not modeled) is assumed to be frequency independent relative to the model and the magnitudes are adjusted to all have the same peak magnitude.
-
 ## Tutorials and Documentation
-* Documentation for the toolbox is in `documentation.pdf`. Example Python plots in the documentation are generated using `demo_alkhairy2019.py`, along with some additional computational examples. Uncomment the ones as needed to demonstrate capabilities, e.g. `outputsignal_autocorrelates()`, `outputsignal_correlate_with()`, and `outputsignals_correlogram()` together show various correlation plots involving the output signals from a filterbank. Similar, the example MATLAB plots in the documentation and some additional computations are in `demo_alkhairy.m`. These tests illustrate a comprehensive set of the toolbox's capabilities.
-* The first half of `plot_tutorial.py`, `alkhairy2019.m`, and `alkhairy2019.m` generate some of the figures in [1] and [2] are are of the greatest interest to those in auditory physics and modeling cochlear mechanisms.
-* The second half of `plot_tutorial.py`, `alkhairy2024.m`, and `alkhairy2024rat.m` generate some of the figures in [3] and [4] and are of the greatest interest to those in signal processing and filter design.
-
+* Documentation for the toolbox is in `documentation.pdf`. Example Python plots in the documentation are generated using `GEFs_alkhairy.py`, along with some additional computational examples. Uncomment the ones as needed to demonstrate capabilities, e.g. `outputsignal_autocorrelates()`, `outputsignal_correlate_with()`, and `outputsignals_correlogram()` together show various correlation plots involving the output signals from a filterbank. Similar, the example MATLAB plots in the documentation and some additional computations are in `GEFs_alkhairy.m`. These tests illustrate a comprehensive set of the toolbox's capabilities.
+* `plot_tutorial.py`, `alkhairy2024.m`, and `alkhairy2024rat.m` generate some of the figures in [3] and [4] and are of the greatest interest to those in signal processing and filter design.
 
 ## Requirements for Running the Toolbox
-The toolbox may be used in Python or MATLAB. In either case, you will need to install Python along with required libraries which are listed in `requirements.txt`.
 
-To install the requirements, run the following in Python 3,
+### 1. Python Environment
+The toolbox may be used in Python or MATLAB. In either case, you will need to install **Python 3.12** **[[Link]](https://www.python.org/downloads/release/python-3128/)**.
+This can be done globally or using a virtual environment - e.g. [see here](https://dev.to/emminex/how-to-install-python-libraries-in-visual-studio-code-38i1).
+
+### 2. Installing Refactoring Branch of GEFs Toolbox
+
+#### 2.1. Installation via Python Via Terminal (PowerShell/PyCharm)
+For users working in Python, it is highly recommended to run these commands via Terminal (PowerShell/PyCharm):
+
+```
+pip install setuptools wheel
+pip install --no-build-isolation git+https://github.com/AnalyticModeling/GEFs.git@Refactoring
+```
+
+#### 2.2. Installation via MATLAB (command Window)
+To use the model's features within MATLAB, The GEFs toolbox Refactoring branch must be cloned :
+
+```
+!git clone -b Refactoring https://github.com/AnalyticModeling/GEFs.git
+```
+
+### 3. Libraries Installation
+To install the necessary dependencies, navigate to the project folder and run the following command in your terminal:
 
 ```
 $ pip install -r requirements.txt
 ```
 
-This can be done globally or using a virtual environment - e.g. [see here](https://dev.to/emminex/how-to-install-python-libraries-in-visual-studio-code-38i1).
-
 ## Contributing
-<!-- Before submitting a pull request, please run the tutorial files `tutorial.py`, `alkhairy2019.m`, and `alkhairy2024.m` to make sure that the changes do not break the code. Future releases may include dedicated unit tests. -->
-Before submitting a pull request, please run the tutorial files `demo_alkhairy.py` and `demo_alkhairy.m` to make sure that the changes do not break the code. Future releases may include dedicated unit tests.
+
+please complete the following validation steps before submitting a pull request:
+
+### Python Validation
+The Python implementation includes a unit testing suite located in the `tests/` directory.
+* **Run Unit Tests:** Execute all files within the `tests/` folder. Ensure the output for each test is "Passed" or as expected. 
+    * *Note: There is currently one known minor test failure; please ensure your changes do not introduce any additional regressions.*
+* **Run Demo:** Execute `demo_GEFs.py` to verify that the core model visualizations and functionalities remain intact.
+
+### MATLAB Validation
+please manually verify the MATLAB implementation to ensure changes do not break the logic:
+* Run `alkhairy2024.m` and `alkhairy2024rat.m` to check for execution errors.
+* **Run Demo:** Execute `demo_GEFs.m` and confirm the output matches the expected physiological behavior.
+
 
 ## Contributors
 Wayne Zhao
@@ -64,14 +84,8 @@ Supervisor: Samiya Alkhairy
 
 ### General Filters and Signals: Constructing Arbitrary Filters and Multiband Filters
 * Arbitrary filters may be constructed - e.g. using provided poles and zeros or by provided a transfer function, then used for filtering any signal.
-* Parameterized filters using the parameterized model in [1] representing cochleas are constructed with the transfer function (in terms of $s$) $C\frac{1}{((s-p)(s-\overline{p}))^{B_u}}$ when modeling pressure and $C\frac{(s+A_p)}{((s-p)(s-\overline{p}))^{B_u+1}}$ when modeling velocity, where $p = ib_p-A_p$. The variables $A_p$, $b_p$, and $B_u$ can be directly inputted into the model, while $C$ can be inputted in two different ways.
 * Parameterized filters may also be constructed by specifying the resulting characteristics a filter is supposed to be have (e.g. bandwidth), and the program will estimate appropriate original constants.
 * Multiband filters can be constructed from providing lists of constants/characteristics
-
-### General Filters and Signals: Filterbanks and Cochleas
-* Filterbanks are treated as graphs on filters. The most common filterbanks will have filters in series or parallel.
-* Cochleas are examples of filterbanks with extra functionality attached. They may also be specified by providing only a species, in which case default values are used.
-![Figure 3 from paper (1)][/Python_figures/2019_fig3.png]
 
 ### General Filters and Signals: Filtering
 * A signal provided as a time-series or a frequency response may be inputted into a constructed or designed filter, filterbank, or multiband filter.
@@ -81,7 +95,12 @@ Supervisor: Samiya Alkhairy
 ### General Filters and Signals: Signal Analysis and Plots
 * The toolbox includes functionalities for any signal such as autocorrelation and envelope extraction.
 * Filterbanks with constitutive filters - each with a different peak frequency, may be used to generate outputs. Plots include the envelope of the output signals as a function of time and peak frequency.
-![Figure 5 from paper (1)][/Python_figures/2019_fig5.png]
+
+<p align="center">
+  <img src="images/Fig5_2019.png" width="450">
+  <br>
+  <em>Figure 5 from paper [1].</em>
+</p>
 
 ## More details on GEFs and their design motivations
 
@@ -90,12 +109,22 @@ Supervisor: Samiya Alkhairy
 * The characteristics-based design method is direct, non-iterative, highly-accurate for sharp filters, and allows for designing sharp filters with minimal delay.
 * The characteristics-based design methods extends beyond GEFs to related bandpass filters (see [3]) as well as to filterbanks and bandpass filters and may be used for adaptive filtering based on variable filter design.
 * The accuracy in achieving the desired specifications on filter characteristics is assessed.
-![Figure 5 from paper (3)][/Python_figures/2024_fig5.png]
+
+<p align="center">
+  <img src="images/Fig5_2024.png" width="500">
+  <br>
+  <em>Figure 5 from paper [3].</em>
+</p>
 
 ### GEFs: Designing and Filtering with Rational Exponent Filters (Rational GEFs)
 * In order to access a continuum of filter characteristics, GEFs may have rational exponents rather than being constraint to discrete filter behavior.
 * The toolbox includes various solution methods for filtering using rational GEFs.
-![Figure 1 from paper (3)][/Python_figures/2024_fig3.png]
+
+<p align="center">
+  <img src="images/Fig1_2024.png" width="800">
+  <br>
+  <em>Figure 1 from paper [3].</em>
+</p>
 
 ### GEFs: Potential Signal Processing Applications for GEFs
 * Potential applications may benefit from the direct specification over desired characteristics as well as the fine control over the characteristics enabled by the rational exponents primarily include those that make use of bandpass filterbanks and multiband filters. Such applications may include: parameteric equalizers, a front end for speech processing, microseismic signal analysis, and signal classification. <!-- XXX INSERT.  -->
