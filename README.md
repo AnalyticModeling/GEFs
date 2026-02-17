@@ -27,29 +27,43 @@ More details are provided later as well as in the documentation, but in summary,
 The toolbox may be used in Python or MATLAB. In either case, you will need to install **Python 3.12** **[[Link]](https://www.python.org/downloads/release/python-3128/)**.
 This can be done globally or using a virtual environment - e.g. [see here](https://dev.to/emminex/how-to-install-python-libraries-in-visual-studio-code-38i1).
 
-### 2. Installing Refactoring Branch of GEFs Toolbox
+### 2. Cloning the GEFs Toolbox repository For Pycharm (python IDE) or Matlab
 
-#### 2.1. Installation via Python Via Terminal (PowerShell/PyCharm)
-For users working in Python, it is highly recommended to run these commands via Terminal (PowerShell/PyCharm):
-
-```
-pip install setuptools wheel
-pip install --no-build-isolation git+https://github.com/AnalyticModeling/GEFs.git@Refactoring
-```
-
-#### 2.2. Installation via MATLAB (command Window)
-To use the model's features within MATLAB, The GEFs toolbox Refactoring branch must be cloned :
+Create new project via cloning feature in MATLAB or Pycharm (based on your usage) and paste the repository HTTP link :
 
 ```
-!git clone -b Refactoring https://github.com/AnalyticModeling/GEFs.git
+https://github.com/AnalyticModeling/GEFs.git
+```
+
+Then run the following based on what you are woking on (Python or MATLAB) in Pycharm terminal or MATLAB command window 
+
+#### 2.1 For python (in Pycharm terminal)
+```
+git checkout -f Refactoring
+```
+
+#### 2.2 For MATLAB (in command window)
+```
+!git checkout -f Refactoring
 ```
 
 ### 3. Libraries Installation
 To install the necessary dependencies, navigate to the project folder and run the following command in your terminal:
 
+#### 3.1 For python (in Pycharm terminal)
+
 ```
-$ pip install -r requirements.txt
+pip install -r requirements.txt
 ```
+
+#### 3.2 For MATLAB (in command window)
+
+```
+!pip install -r requirements.txt
+```
+
+### Note:
+Make sure that python interpreter is 3.12 otherwise it won't work.
 
 ## Contributing
 
