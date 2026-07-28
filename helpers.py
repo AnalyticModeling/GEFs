@@ -2,6 +2,7 @@ import numpy as np
 # import scipy as sp
 import scipy.optimize
 import scipy.special
+import scipy.integrate
 import matplotlib.pyplot as plt
 
 def mag2db(x):
@@ -131,7 +132,7 @@ def computedfiltercharacteristics(tfunc=None, data=None, betas=None, n=10., n2=3
   BWn2dBbeta = get_BWndBbeta(n2)
   Qn2 = Bpeak/BWn2dBbeta
 
-  ERBbeta = np.trapz((magns_raw/magns_raw[Bpeak_index])**2, x=betas)
+  ERBbeta = scipy.integrate.trapezoid((magns_raw/magns_raw[Bpeak_index])**2, x=betas)
   Qerb = Bpeak/ERBbeta
 
   Sbeta = -np.gradient(np.gradient(magns_db, betas), betas)[Bpeak_index]
