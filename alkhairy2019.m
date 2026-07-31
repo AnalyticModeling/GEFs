@@ -1,6 +1,5 @@
 addpath matlab_wrappers
 pyenv(ExecutionMode="OutOfProcess")
-% axis labeling?
 
 function fig3_2019
     c = Cochlea(Ap=[0.05], bp=[1], Bu=[1.3]);
