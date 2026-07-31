@@ -157,6 +157,3 @@ figure
 fig3_2024
 figure
 fig5_2024
-
-% fil.PyFilter.filter.tf applied to an array errors. Redefine inside MATLAB
-% objects? Force user to pass in numpy arrays

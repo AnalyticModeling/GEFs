@@ -10,7 +10,8 @@ function fig1_2024rat()
     freqs = py.numpy.array(logspace(log10(0.8), log10(1.2), 10000));
     responses = arrayfun(@(fil) double(fil.PyFilter.filter.tf(1j*freqs)), fils, UniformOutput=false);
 
-    tiledlayout(1, 2, TileSpacing='tight')
+    overallplot = tiledlayout(1, 2, TileSpacing='tight');
+    title(overallplot, 'flexibility of behavior with non-integer B_u - TFs with b_p = 1, A_p = 0.05, B_u \in \{2, 2.5, 3\}')
 
     nexttile
     twodb = mag2db(abs(responses{1}));
@@ -35,6 +36,7 @@ function fig1_2024rat()
     semilogx(freqs, threecyc-max(threecyc))
     ylabel('Phase (cyc)')
     xlabel('\beta')
+    legend('B_u=2', 'B_u=2.5', 'B_u=3')
 end
 
 function fig2_2024rat()
@@ -56,8 +58,9 @@ function fig2_2024rat()
     plot(2:8, Q3s, DisplayName='Q_3')
     hold on
     plot(2:8, Q15s, DisplayName='Q_{15}')
-    yline(0, ':k')
+    title('continuum of values of frequency domain characteristics afforded by non-integer B_u - generated with b_p = 1, A_p = 0.05')
     legend
+    yline(0, ':k', HandleVisibility='off')
 end
 
 function fig3_2024rat()
@@ -75,7 +78,8 @@ function fig3_2024rat()
     sig = Signal(mode='t', data=tones(timestamps), fs=fs);
     outsig = fil.solve(sig, method='tf');
 
-    tiledlayout(2, 1, TileSpacing='tight')
+    overallplot = tiledlayout(2, 1, TileSpacing='tight');
+    title(overallplot, 'processing using non-integer TF representation, b_p = 1, A_p = 0.05, B_u = 2.5')
 
     nexttile
     plot(timestamps, sig.get_data('t'))
@@ -130,25 +134,7 @@ function fig7_2024rat()
 
     nexttile
     plot(sol.PySignal.timestamps, sol.get_data('ttilde'))
-
-    nexttile
-    % broken
 end
-
-% def fig7_2024rational():
-%   fil = Filter(Ap=0.1, bp=1, Bu=1.75, cf=1)
-%   sig = Signal.linear_chirp(f_init=-2, f_final=2, fs=30, num_samples=3000) # set this to be able to be ttilde
-%   sig = Signal(mode='ttilde', data=sig.get_data('t'), fs=30)
-%   sol = fil.solve(sig, method='tf')
-% 
-%   fig, axs = plt.subplots(2, 2, constrained_layout=True)
-%   axs[0][0].plot(sig.timestamps, sig['ttilde'])
-%   axs[0][1].plot(sol.timestamps, sol['ttilde'])
-%   winsig, sigbound = sig.spectrogram(show=False)
-%   winsol, solbound = sol.spectrogram(show=False)
-%   axs[1][0].imshow(abs(winsig[0:21][::-1]), cmap='gray', aspect='auto', extent=(0, sigbound[1], 0, sigbound[3]/5))
-%   axs[1][1].imshow(abs(winsol[0:21][::-1]), cmap='gray', aspect='auto', extent=(0, solbound[1], 0, solbound[3]/5))
-%   plt.show()
 
 function fig8_2024rat()
     function res = tones(t)
@@ -193,7 +179,6 @@ function fig9_2024rat()
         res = exp(-0.04.*t).*besselj(0, t);
     end
     ts = (0:999)/10;
-    % Handles to MATLAB functions not handled?
     sig = Signal(mode='ttilde', data=myfunc(ts), fs=10);
 
     tiledlayout(2, 1, TileSpacing='tight')
@@ -223,13 +208,7 @@ figure
 fig3_2024rat()
 figure
 fig4_2024rat()
-% fig7_2024rat() % broken
 figure
 fig8_2024rat()
 figure
 fig9_2024rat()
-
-% fil.PyFilter.filter.tf applied to an array errors. Redefine inside MATLAB
-% objects? Force user to pass in numpy arrays
-
-% char array vs string?
